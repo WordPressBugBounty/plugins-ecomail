@@ -1,0 +1,344 @@
+# Copyright (C) 2021 WPify
+# This file is distributed under the same license as the Ecomail plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: Ecomail 2.2.3\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/ecomail-"
+"woocommerce\n"
+"POT-Creation-Date: 2022-12-09T18:07:39+00:00\n"
+"PO-Revision-Date: 2022-12-09 19:14+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n>=2 && n<=4 ? 1 : 2);\n"
+"X-Generator: Poedit 3.2\n"
+"X-Domain: ecomail\n"
+
+#. Plugin Name of the plugin
+#: src/Settings.php:210
+msgid "Ecomail"
+msgstr "Ecomail"
+
+#. Description of the plugin
+msgid "Official Ecomail integration for WordPress and WooCommerce"
+msgstr "Oficiální integrace Ecomail pro WordPress a WooCommerce"
+
+#. Author of the plugin
+msgid "ECOMAIL.CZ"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://ecomail.cz/"
+msgstr ""
+
+#: ecomail.php:81
+msgid ""
+"<div class=\"error notice\"><p>Opps! %s requires a minimum PHP version of "
+"%s. Your current version is: %s. Please contact your host to upgrade.</p></"
+"div>"
+msgstr ""
+"<div class=\"error notice\"><p>Jejda! %s vyžaduje minimální verzi PHP %s. "
+"Vaše aktuální verze je: %s. Kontaktujte prosím svého hostitele a požádejte "
+"ho o aktualizaci.</p></div>"
+
+#: ecomail.php:95
+msgid ""
+"<div class=\"error notice\"><p>Opps! %s is corrupted it seems, please re-"
+"install the plugin.</p></div>"
+msgstr ""
+"<div class=\"error notice\"><p>Jejda! %s je poškozen zdá se, prosím, "
+"přeinstalujte plugin.</p></div>"
+
+#: ecomail.php:116
+msgid "This plugin requires WooCommerce. Please install and activate it first."
+msgstr "Pro používání pluginu Ecomail nejprve aktivujte WooCommerce."
+
+#: src/Admin.php:22
+msgid "Settings"
+msgstr "Nastavení"
+
+#: src/Ecomail.php:159
+msgid "The upload is running on background"
+msgstr "Nahrávání probíhá na pozadí"
+
+#: src/Ecomail.php:241
+msgid "The bulk upload of users to Ecomail is pending."
+msgstr "Hromadné odesílání uživatelů do služby Ecomail čeká na vyřízení."
+
+#: src/Settings.php:55
+msgid "Add tracking code to website"
+msgstr "Přidat na web trackovací kód"
+
+#: src/Settings.php:56
+msgid "Check to add tracking code to the website"
+msgstr "Zaškrtněte pro přidání trackovacího kódu na váš web"
+
+#: src/Settings.php:61
+msgid "Enable manual tracking"
+msgstr "Povolit sledování košíku"
+
+#: src/Settings.php:62
+msgid ""
+"Check if you want to identify the user by WP login details. The priorities "
+"are - Ecomail email, Customer email, WP User email"
+msgstr ""
+"Zaškrtněte, pokud chcete identifikovat uživatele podle WP účtu. Priorita "
+"určení emailu je parametr v URL, email zákazníka, email WP uživatele"
+
+#: src/Settings.php:67
+msgid "Subscribe on checkout"
+msgstr "Přihlášení k newsletteru v pokladně"
+
+#: src/Settings.php:68
+msgid "Check to enable Ecomail subscriptions on checkout"
+msgstr "Zaškrtněte pro přidávání zákazníků do Ecomailu při odeslání objednávky"
+
+#: src/Settings.php:73
+msgid "Show checkbox on checkout"
+msgstr "Zobrazit v pokladně checkbox „Mám zájem o odběr novinek..“"
+
+#: src/Settings.php:74
+msgid ""
+"Check to display \"I'd like to receive newsletters\" checkbox on checkout"
+msgstr ""
+"Povolte pro zobrazení checkboxu „Mám zájem o zasílání novinek“ v pokladně"
+
+#: src/Settings.php:79
+msgid "Text for Subscribe on checkout checkbox"
+msgstr "Text checkboxu v pokladně"
+
+#: src/Settings.php:80
+msgid "Enter the text that will appear on checkout subscription"
+msgstr "Zadejte text, který se zobrazí u checkboxu v pokladně"
+
+#: src/Settings.php:81
+msgid "I'd like to receive newsletters"
+msgstr "Mám zájem o zasílání novinek"
+
+#: src/Settings.php:86
+msgid "Update subscriber data in Ecomail"
+msgstr "Aktualizovat data kontaktů v Ecomailu"
+
+#: src/Settings.php:87
+msgid ""
+"Check if you want to update existing contacts in Ecomail with the details "
+"entered on checkout"
+msgstr ""
+"Zašrtněte, pokud chcete aktualizovat data existujících kontaktů v Ecomailu z "
+"údajů zadaných v pokladně"
+
+#: src/Settings.php:92
+msgid "List for checkout subscriptions"
+msgstr "Seznam pro přihlášení v checkoutu"
+
+#: src/Settings.php:94
+msgid ""
+"Select the list that you want subscribe the customers on checkout. Click <a "
+"href=\"%s\">here</a> to refresh the lists"
+msgstr ""
+"Vyberte seznam, do kterého chcete přidat kontakty, které se přihlásí v "
+"pokladně. Pro obnovení seznamů <a href=\"%s\">klikněte zde</a>"
+
+#: src/Settings.php:102
+msgid "Skip confirmation"
+msgstr "Přeskočit double opt-in"
+
+#: src/Settings.php:103
+msgid "Check to skip double opt-in"
+msgstr "Zaškrtněte pro přeskočení double opt-in"
+
+#: src/Settings.php:108
+msgid "Trigger autoresponders"
+msgstr "Spouštět kontaktu automatizace"
+
+#: src/Settings.php:109
+msgid ""
+"Check to trigger Ecomail autoresponders when the user is added to the list"
+msgstr ""
+"Zaškrtněte, pokud chcete spustit autorespondery po přidání kontaktu do "
+"seznamu"
+
+#: src/Settings.php:114
+msgid "Fields to register on checkout"
+msgstr "Pole v pokladně"
+
+#: src/Settings.php:115
+msgid "Select fields that you want to send to Ecomail on checkout subscription"
+msgstr ""
+"Vyberte pole, která se mají zasílat do Ecomailu při přihlášení v pokladně"
+
+#: src/Settings.php:119
+msgid "First name"
+msgstr "Křestní jméno"
+
+#: src/Settings.php:123
+msgid "Last name"
+msgstr "Příjmení"
+
+#: src/Settings.php:127
+msgid "Street"
+msgstr "Ulice"
+
+#: src/Settings.php:131
+msgid "City"
+msgstr "Město"
+
+#: src/Settings.php:135
+msgid "Postcode"
+msgstr "PSČ"
+
+#: src/Settings.php:139
+msgid "Country"
+msgstr "Země"
+
+#: src/Settings.php:143
+msgid "Company"
+msgstr "Společnost"
+
+#: src/Settings.php:147
+msgid "Phone"
+msgstr "Telefon"
+
+#: src/Settings.php:155
+msgid "API Source"
+msgstr "API zdroj"
+
+#: src/Settings.php:156
+msgid "Enter the contact source that you want to add to Ecomail."
+msgstr "Zadejte zdroj kontaktu, který chcete přidat do Ecomailu."
+
+#: src/Settings.php:161
+msgid "Enable order tracking"
+msgstr "Povolit sledování objednávek"
+
+#: src/Settings.php:162
+msgid ""
+"Check if you want to send order data to Ecomail. Only for Marketer+ plan."
+msgstr ""
+"Zaškrtněte pro povolení odesílání dat o objednávkách do Ecomailu. Pouze pro "
+"plán Marketer+."
+
+#: src/Settings.php:167
+msgid "Enable cart tracking"
+msgstr "Povolit sledování košíku"
+
+#: src/Settings.php:168
+msgid ""
+"Check if you want to send customer carts to Ecomail. This data can be used "
+"for abandoned cart automation in Ecomail. Only for Marketer+ plan."
+msgstr ""
+"Zašrtněte pro odesílání obsahu košíku do Ecomailu. Tato data mohou být "
+"využita např. pro funkci Zapomenutý košík. Pouze pro plán Marketer+."
+
+#: src/Settings.php:173
+msgid "Enable Last view (product) tracking"
+msgstr "Povolit sledování posledního zobrazeného (produktu)"
+
+#: src/Settings.php:174
+msgid ""
+"Check if you want to send Last viewed product to Ecomail. This data can be "
+"used for automation in Ecomail (ECM_LAST_VIEW merge tag). Only for Marketer+ "
+"plan."
+msgstr ""
+"Zaškrtněte, zda chcete odeslat naposledy zobrazený produkt do služby "
+"Ecomail. Tyto údaje lze použít pro automatizaci v Ecomailu (ECM_LAST_VIEW "
+"merge tag). Pouze pro tarif Marketer+."
+
+#: src/Settings.php:180
+msgid "Bulk upload existing customers"
+msgstr "Hromadné nahrání stávajících zákazníků"
+
+#: src/Settings.php:181
+msgid ""
+"<strong>The settings above will be used (List ID, fields), please make sure "
+"to save the settings first before clicking on the Bulk upload button.</"
+"strong> The users will be uploaded in background, in batches of 500."
+msgstr ""
+"<strong>Budou použita výše uvedená nastavení (ID seznamu, pole), před "
+"kliknutím na tlačítko Hromadné odeslání nezapomeňte nastavení nejprve uložit."
+"</strong> Uživatelé budou nahráváni na pozadí, v dávkách po 500."
+
+#: src/Settings.php:188
+msgid "Marketing cookie"
+msgstr "Marketingová cookie"
+
+#: src/Settings.php:189
+msgid ""
+"You need consent from the visitor for marketing cookies. If you don`t enter "
+"the name and value of the marketing cookie the data will be sent as if "
+"consent had been given."
+msgstr ""
+"Pro marketingové soubory cookie potřebujete souhlas návštěvníka. Pokud "
+"nezadáte název a hodnotu marketingového souboru cookie, budou data odeslány, "
+"jako by byl souhlas udělen."
+
+#: src/Settings.php:194
+msgid "Marketing cookie name"
+msgstr "Název marketingového cookie"
+
+#: src/Settings.php:195
+msgid ""
+"Enter the name of the cookie that represents the agreed marketing cookies. "
+"For example, in the case of using the \"Complianz\" plugin, this is "
+"<code>cmplz_marketing</code>."
+msgstr ""
+"Zadejte název souboru cookie, který představuje povolení marketingovích "
+"souborů cookie. Například v případě použití pluginu \"Complianz\" je to "
+"<code>cmplz_marketing</code>."
+
+#: src/Settings.php:200
+msgid "Marketing cookie value"
+msgstr "Hodnota marketingového cookie"
+
+#: src/Settings.php:201
+msgid ""
+"Enter the value of the cookie that represents the agreed marketing cookies. "
+"For example, in the case of using the \"Complianz\" plugin, this is "
+"<code>allow</code>."
+msgstr ""
+"Zadejte hodnotu souboru cookie, která představuje povolení marketingovích "
+"souborů cookie. Například v případě použití pluginu \"Complianz\" je to "
+"<code>allow</code>."
+
+#: src/Settings.php:209
+msgid "Ecomail Settings"
+msgstr "Nastavení Ecomail"
+
+#: src/Settings.php:217
+msgid "Ecomail settings"
+msgstr "Nastavení Ecomail"
+
+#: src/Settings.php:223
+msgid "API key"
+msgstr "API klíč"
+
+#: src/Settings.php:224
+msgid "Enter API key"
+msgstr "Zadejte API klíč"
+
+#: src/Settings.php:229
+msgid "App ID"
+msgstr "App ID"
+
+#: src/Settings.php:230
+msgid "Enter App ID - this is first part of your Ecomail account URL."
+msgstr "Zadejte App ID - je to první část adresy vašeho účtu Ecomail."
+
+#~ msgid "WPify"
+#~ msgstr "WPify"
+
+#~ msgid "https://www.wpify.io/"
+#~ msgstr "https://www.wpify.io/"
+
+#~ msgid "Manual tracking URL parameter"
+#~ msgstr "Parametr v URL pro manuální trackování"
+
+#~ msgid ""
+#~ "Enter URL parametr that will be used for identifying the user. The "
+#~ "default parameter is <code>ecmid</code>"
+#~ msgstr ""
+#~ "Zadejte název URL parametru, který používáte pro trackování. Výchozí "
+#~ "parametr je <code>ecmid</code>"
