@@ -4,11 +4,13 @@ namespace Ecomail;
 
 use Ecomail\Managers\ApiManager;
 use Ecomail\Managers\PostTypesManager;
+use Ecomail\Managers\RepositoriesManager;
 
 final class Plugin {
 	public function __construct(
 		ApiManager $api_manager,
 		PostTypesManager $post_types_manager,
+		RepositoriesManager $repositories_manager,
 		Frontend $frontend,
 		Settings $settings,
 		Admin $admin

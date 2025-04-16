@@ -3,9 +3,9 @@
 Contributors: wpify, vasikgreif, mejta, ecomailcz
 Tags: email, marketing, newsletter, ecomail, woocommerce, emailing
 Requires at least: 5.3
-Tested up to: 6.3
+Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 2.1.6
+Stable tag: 2.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,6 +38,17 @@ Official plugin to connect your WooCommerce platform with Ecomail.cz application
 == Screenshots ==
 
 == Changelog ==
+= 2.2.1 =
+* Fix deploy
+
+= 2.2.0 =
+* Add bulk transaction import
+* Add more options for checkbox on checkout
+* Add WooCommerce tags to orders
+* Update dependencies
+* Various fixes and improvements
+
+
 = 2.1.6 =
 * Fix category for variable products
 

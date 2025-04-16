@@ -2,17 +2,17 @@
 /*
  * Plugin Name:          Ecomail
  * Description:          Official Ecomail integration for WordPress and WooCommerce
- * Version:              2.1.6
+ * Version:              2.2.1
  * Requires PHP:         7.4.0
  * Requires at least:    5.3.0
  * Author:               ECOMAIL.CZ
  * Author URI:           https://ecomail.cz/
  * License:              GPL v2 or later
  * License URI:          https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:          ecomail
+ * Text Domain:          ecomail-woocommerce
  * Domain Path:          /languages
  * WC requires at least: 4.5
- * WC tested up to:      8.0
+ * WC tested up to:      9.8
 */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -77,13 +77,21 @@ function ecomail_uninstall() {
  */
 function ecomail_php_upgrade_notice() {
 	$info = get_plugin_data( __FILE__ );
-
-	echo sprintf(
-		__( '<div class="error notice"><p>Opps! %s requires a minimum PHP version of %s. Your current version is: %s. Please contact your host to upgrade.</p></div>', 'ecomail' ),
-		$info['Name'],
-		ECOMAIL_MIN_PHP_VERSION,
-		PHP_VERSION
-	);
+	?>
+    <div class="error notice">
+        <p>
+			<?php
+			printf(
+			/* Translators: %1$s Plugin name, %2$s Plugin min. PHP version, %3$s server PHP version */
+				esc_html( __( 'Opps! %1$s requires a minimum PHP version of %2$s. Your current version is: %3$s. Please contact your host to upgrade.', 'ecomail-woocommerce' ) ),
+				esc_html( $info['Name'] ),
+				esc_html( ECOMAIL_MIN_PHP_VERSION ),
+				esc_html( PHP_VERSION ),
+			);
+			?>
+        </p>
+    </div>
+	<?php
 }
 
 /**
@@ -91,11 +99,19 @@ function ecomail_php_upgrade_notice() {
  */
 function ecomail_php_vendor_missing() {
 	$info = get_plugin_data( __FILE__ );
-
-	echo sprintf(
-		__( '<div class="error notice"><p>Opps! %s is corrupted it seems, please re-install the plugin.</p></div>', 'ecomail' ),
-		$info['Name']
-	);
+	?>
+    <div class="error notice">
+        <p>
+			<?php
+			printf(
+			/* Translators: %s Plugin name */
+				esc_html( __( 'Opps! %s is corrupted it seems, please re-install the plugin.', 'ecomail-woocommerce' ) ),
+				esc_html( $info['Name'] )
+			);
+			?>
+        </p>
+    </div>
+	<?php
 }
 
 
@@ -105,6 +121,7 @@ function ecomail_php_vendor_missing() {
 function ecomail_load_textdomain() {
 	load_plugin_textdomain( 'ecomail', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
+
 add_action( 'init', 'ecomail_load_textdomain' );
 
 /**
@@ -112,10 +129,11 @@ add_action( 'init', 'ecomail_load_textdomain' );
  */
 function ecomail_woocommerce_not_active() {
 	?>
-	<div class="error notice">
-		<p><?php
-			_e( 'This plugin requires WooCommerce. Please install and activate it first.', 'ecomail' ); ?></p>
-	</div>
+    <div class="error notice">
+        <p>
+			<?php esc_html( __( 'This plugin requires WooCommerce. Please install and activate it first.', 'ecomail-woocommerce' ) ); ?>
+        </p>
+    </div>
 	<?php
 }
 
@@ -124,7 +142,7 @@ function ecomail_woocommerce_not_active() {
  */
 function ecomail_plugin_is_active( $plugin ) {
 	if ( is_multisite() ) {
-		$plugins = get_site_option('active_sitewide_plugins');
+		$plugins = get_site_option( 'active_sitewide_plugins' );
 		if ( isset( $plugins[ $plugin ] ) ) {
 			return true;
 		}
@@ -139,13 +157,13 @@ function ecomail_plugin_is_active( $plugin ) {
 
 if ( version_compare( PHP_VERSION, ECOMAIL_MIN_PHP_VERSION ) < 0 ) {
 	add_action( 'admin_notices', 'ecomail_php_upgrade_notice' );
-} elseif ( ! ecomail_plugin_is_active('woocommerce/woocommerce.php') ) {
+} elseif ( ! ecomail_plugin_is_active( 'woocommerce/woocommerce.php' ) ) {
 	add_action( 'admin_notices', 'ecomail_woocommerce_not_active' );
 } else {
 	$deps_loaded   = false;
 	$vendor_loaded = false;
 
-	$deps = array_filter( array( __DIR__ . '/deps/scoper-autoload.php', __DIR__ . '/deps/autoload.php' ), function ( $path ) {
+	$deps = array_filter( array( __DIR__ . '/vendor/ecomail/scoper-autoload.php', __DIR__ . '/vendor/ecomail/autoload.php' ), function ( $path ) {
 		return file_exists( $path );
 	} );
 
@@ -169,7 +187,7 @@ if ( version_compare( PHP_VERSION, ECOMAIL_MIN_PHP_VERSION ) < 0 ) {
 	}
 }
 
-add_action( 'before_woocommerce_init', function() {
+add_action( 'before_woocommerce_init', function () {
 	if ( class_exists( FeaturesUtil::class ) ) {
 		FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__ );
 	}

@@ -2,7 +2,9 @@
 
 namespace Ecomail;
 
+use Ecomail\Models\WooOrderModel;
 use Ecomail\Repositories\SettingsRepository;
+use Ecomail\Repositories\WooOrderRepository;
 
 /**
  * Class Ecomail
@@ -12,21 +14,38 @@ use Ecomail\Repositories\SettingsRepository;
  */
 class Ecomail {
 
+	const COOKIE_NAME = 'ecm_email';
+	const INPUT_NAME = 'ecomail_not_subscribe';
+	const OPTION_EMAIL_LISTS = 'ecomail_lists';
+	const OPTION_BULK_USERS_UPLOAD_IDS = 'ecomail_users_upload_ids';
+	const OPTION_BULK_ORDERS_UPLOAD_IDS = 'ecomail_orders_upload_ids';
+	const SCHEDULE_ORDERS_LIMIT = 500;
+	const SCHEDULE_USERS_LIMIT = 500;
+	const SCHEDULE_USERS_WITH_ORDERS_LIMIT = 100;
+
 	/**
 	 * @var EcomailApi
 	 */
 	private $ecomail_api;
 
 	/**
+	 * @var WooOrderRepository
+	 */
+	private $order_repository;
+
+	/**
 	 * @var SettingsRepository
 	 */
 	private $settings;
 
-	const COOKIE_NAME = 'ecm_email';
-
-	public function __construct( EcomailApi $ecomail_api, SettingsRepository $settings ) {
-		$this->ecomail_api = $ecomail_api;
-		$this->settings    = $settings;
+	public function __construct(
+		EcomailApi $ecomail_api,
+		SettingsRepository $settings,
+		WooOrderRepository $order_repository,
+	) {
+		$this->ecomail_api      = $ecomail_api;
+		$this->order_repository = $order_repository;
+		$this->settings         = $settings;
 
 		$this->setup();
 	}
@@ -35,10 +54,12 @@ class Ecomail {
 		add_action( 'template_redirect', array( $this, 'maybe_save_email_cookie' ) );
 		add_action( 'wp_head', array( $this, 'tracking_code' ) );
 		add_action( 'admin_action_ecomail_refresh_lists', array( $this, 'refresh_lists' ) );
-		add_action( 'admin_action_ecomail_bulk_upload_users', array( $this, 'schedule_users_upload' ) );
+		add_action( 'admin_action_ecomail_bulk_upload_users', array( $this, 'maybe_schedule_users_upload' ) );
+		add_action( 'admin_action_ecomail_bulk_upload_users_and_orders', array( $this, 'maybe_schedule_users_and_orders_upload' ) );
 		add_action( 'ecomail_bulk_import_users', array( $this, 'bulk_import_users' ) );
-		add_action( 'ecomail_bulk_import_users_finished', array( $this, 'finish_bulk_import_users' ) );
+		add_action( 'ecomail_bulk_import_orders', array( $this, 'bulk_import_orders' ) );
 		add_action( 'admin_notices', array( $this, 'pending_bulk_upload_notice' ) );
+		add_action( 'admin_notices', array( $this, 'api_status_notice' ) );
 	}
 
 	public function tracking_code() {
@@ -52,35 +73,35 @@ class Ecomail {
 			return;
 		}
 		?>
-		<!-- Ecomail starts growing -->
-		<script type="text/javascript">
-			;(function (p, l, o, w, i, n, g) {
-				if (!p[i]) {
-					p.GlobalSnowplowNamespace = p.GlobalSnowplowNamespace || [];
-					p.GlobalSnowplowNamespace.push(i);
-					p[i] = function () {
-						(p[i].q = p[i].q || []).push(arguments)
-					};
-					p[i].q = p[i].q || [];
-					n = l.createElement(o);
-					g = l.getElementsByTagName(o)[0];
-					n.async = 1;
-					n.src = w;
-					g.parentNode.insertBefore(n, g)
-				}
-			}(window, document, "script", "//d1fc8wv8zag5ca.cloudfront.net/2.4.2/sp.js", "ecotrack"));
-			window.ecotrack('newTracker', 'cf', 'd2dpiwfhf3tz0r.cloudfront.net', { // Initialise a tracker
-				appId: '<?php echo esc_attr( $app_id ); ?>'
-			});
-			window.ecotrack('setUserIdFromLocation', 'ecmid');
-			<?php
-			$this->manual_tracking();
-			?>
+        <!-- Ecomail starts growing -->
+        <script type="text/javascript">
+          ;(function (p, l, o, w, i, n, g) {
+            if (!p[i]) {
+              p.GlobalSnowplowNamespace = p.GlobalSnowplowNamespace || [];
+              p.GlobalSnowplowNamespace.push(i);
+              p[i] = function () {
+                (p[i].q = p[i].q || []).push(arguments)
+              };
+              p[i].q = p[i].q || [];
+              n = l.createElement(o);
+              g = l.getElementsByTagName(o)[0];
+              n.async = 1;
+              n.src = w;
+              g.parentNode.insertBefore(n, g)
+            }
+          }(window, document, "script", "//d1fc8wv8zag5ca.cloudfront.net/2.4.2/sp.js", "ecotrack"));
+          window.ecotrack('newTracker', 'cf', 'd2dpiwfhf3tz0r.cloudfront.net', { // Initialise a tracker
+            appId: '<?php echo esc_attr( $app_id ); ?>'
+          });
+          window.ecotrack('setUserIdFromLocation', 'ecmid');
+		  <?php
+		  $this->manual_tracking();
+		  ?>
 
-			window.ecotrack('trackPageView');
+          window.ecotrack('trackPageView');
 
-		</script>
-		<!-- Ecomail stops growing -->
+        </script>
+        <!-- Ecomail stops growing -->
 		<?php
 	}
 
@@ -120,7 +141,7 @@ class Ecomail {
 
 
 	public function get_lists() {
-		return get_option( 'ecomail_lists', array() );
+		return get_option( self::OPTION_EMAIL_LISTS, array() );
 	}
 
 	public function refresh_lists() {
@@ -132,90 +153,181 @@ class Ecomail {
 	public function save_lists() {
 		$lists = $this->ecomail_api->get_lists();
 		if ( ! is_wp_error( $lists ) ) {
-			update_option( 'ecomail_lists', $lists );
+			update_option( self::OPTION_EMAIL_LISTS, $lists );
 		}
 
 		return $lists;
 	}
 
 	public function maybe_save_email_cookie() {
-		if ( isset( $_GET['ecmid'] ) ) {
-			$this->save_email_cookie( sanitize_text_field( $_GET['ecmid'] ) );
+		if ( filter_input( INPUT_GET, 'ecmid' ) ) {
+			$this->save_email_cookie( sanitize_text_field( wp_unslash( filter_input( INPUT_GET, 'ecmid' ) ) ) );
 		}
 	}
 
 	public function save_email_cookie( $email ) {
-		setcookie( $this::COOKIE_NAME, $email, time() + ( 86400 * 30 ), '/' ); // 86400 = 1 day
+		setcookie( self::COOKIE_NAME, $email, time() + ( 86400 * 30 ), '/' ); // 86400 = 1 day
 	}
 
 	public function get_email_cookie() {
-		return $_COOKIE[ $this::COOKIE_NAME ] ?? '';
+		return sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ?? '' ) );
 	}
 
-	public function schedule_users_upload() {
-		if ( get_option( 'ecomail_users_upload_pending' ) ) {
-			wp_die( __( 'The upload is running on background', 'ecomail' ) );
+	/**
+	 * Maybe schedule users upload.
+	 *
+	 * @return void
+	 */
+	public function maybe_schedule_users_upload() {
+		if ( $this->is_import_running() ) {
+			wp_die( esc_html( __( 'The upload is running on background', 'ecomail-woocommerce' ) ) );
 		}
 
-		update_option( 'ecomail_users_upload_pending', 1 );
-		for ( $i = 1; $i < 1000000000; $i ++ ) {
-			$args  = array(
-				'number' => 500,
-				'fields' => 'ID',
-				'paged'  => $i,
-			);
-			$users = get_users( $args );
-			if ( empty( $users ) ) {
-				as_schedule_single_action( time(), 'ecomail_bulk_import_users_finished' );
-				break;
-			}
-
-			as_schedule_single_action( time(), 'ecomail_bulk_import_users', array( 'ids' => $users ) );
-		}
+		$this->add_user_ids_to_list();
 		wp_safe_redirect( admin_url() );
 	}
 
-	public function bulk_import_users( $ids ) {
+	/**
+	 * Maybe schedule users and orders upload.
+	 *
+	 * @return void
+	 */
+	public function maybe_schedule_users_and_orders_upload() {
+		if ( $this->is_import_running() ) {
+			wp_die( esc_html( __( 'The upload is running on background', 'ecomail-woocommerce' ) ) );
+		}
+
+		$this->add_user_ids_to_list( 1, true );
+		wp_safe_redirect( admin_url() );
+	}
+
+	/**
+	 * Add user IDs to list.
+	 *
+	 * @param int $paged
+	 * @param bool $with_orders
+	 *
+	 * @return void
+	 */
+	public function add_user_ids_to_list( $paged = 1, $with_orders = false ) {
+		$limit = ( $with_orders ) ? self::SCHEDULE_USERS_WITH_ORDERS_LIMIT : self::SCHEDULE_USERS_LIMIT;
+
+		$args     = array(
+			'number' => $limit,
+			'fields' => 'ID',
+			'paged'  => $paged,
+		);
+		$user_ids = get_users( $args );
+		if ( ! empty( $user_ids ) ) {
+			$this->update_ids_option( self::OPTION_BULK_USERS_UPLOAD_IDS, $user_ids );
+			if ( ! as_has_scheduled_action( 'ecomail_bulk_import_users', array(), 'ecomail' ) ) {
+				$this->schedule_users_upload();
+			}
+
+			if ( count( $user_ids ) === $limit ) {
+				$this->add_user_ids_to_list( ( $paged + 1 ), $with_orders );
+			}
+
+			if ( $with_orders ) {
+				foreach ( $user_ids as $user_id ) {
+					$this->add_user_orders_to_list( $user_id );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Add user orders to list.
+	 *
+	 * @param $user_id
+	 *
+	 * @return void
+	 * @throws \EcomailDeps\Wpify\Model\Exceptions\RepositoryNotInitialized
+	 */
+	public function add_user_orders_to_list( $user_id ) {
+		$customer  = new \WC_Customer( $user_id );
+		$order_ids = array();
+		/** Order model. @var WooOrderModel $order */
+		foreach ( $this->order_repository->find_by_customer( $customer->get_id() ) as $order ) {
+			$order_ids[] = $order->id;
+		}
+		if ( ! empty( $order_ids ) ) {
+			$this->update_ids_option( self::OPTION_BULK_ORDERS_UPLOAD_IDS, $order_ids );
+
+			if ( ! as_has_scheduled_action( 'ecomail_bulk_import_orders', array(), 'ecomail' ) ) {
+				$this->schedule_orders_upload();
+			}
+		}
+	}
+
+	/**
+	 * Schedule users upload.
+	 *
+	 * @return void
+	 */
+	private function schedule_users_upload() {
+		as_schedule_single_action( time(), 'ecomail_bulk_import_users', array(), 'ecomail' );
+	}
+
+	/**
+	 * Schedule orders upload.
+	 *
+	 * @return void
+	 */
+	private function schedule_orders_upload() {
+		as_schedule_single_action( time(), 'ecomail_bulk_import_orders', array(), 'ecomail' );
+	}
+
+	/**
+	 * Update IDs option.
+	 *
+	 * @param $key
+	 * @param $ids
+	 *
+	 * @return void
+	 */
+	private function update_ids_option( $key, $ids ) {
+		$current_ids = array_merge( get_option( $key, array() ), $ids );
+		update_option( $key, $current_ids );
+	}
+
+	/**
+	 * Is import running.
+	 *
+	 * @return bool
+	 */
+	private function is_import_running() {
+		return (
+			as_has_scheduled_action( 'ecomail_bulk_import_users', array(), 'ecomail' ) ||
+			as_has_scheduled_action( 'ecomail_bulk_import_orders', array(), 'ecomail' )
+		);
+	}
+
+	/**
+	 * Bulk import users.
+	 *
+	 *
+	 * @throws \Exception
+	 */
+	public function bulk_import_users() {
+		$user_ids           = get_option( self::OPTION_BULK_USERS_UPLOAD_IDS, array() );
+		$user_ids_to_import = array_splice( $user_ids, 0, self::SCHEDULE_USERS_LIMIT );
+		$this->update_ids_option( self::OPTION_BULK_USERS_UPLOAD_IDS, $user_ids );
+
+		if ( empty( $user_ids_to_import ) ) {
+			return;
+		}
+
 		$args  = array(
-			'include' => $ids,
+			'include' => $user_ids_to_import,
 			'limit'   => - 1,
 		);
 		$users = get_users( $args );
 		$data  = array();
 		foreach ( $users as $user ) {
 			/** @var \WP_User $user */
-			$customer_data['email'] = $user->user_email;
-			$fields                 = $this->settings->get_option( 'woocommerce_checkout_subscribe_fields' );
-			$customer               = new \WC_Customer( $user->ID );
-			if ( in_array( 'first_name', $fields ) ) {
-				$customer_data['name'] = $customer->get_billing_first_name();
-			}
-			if ( in_array( 'last_name', $fields ) ) {
-				$customer_data['surname'] = $customer->get_billing_last_name();
-			}
-			if ( in_array( 'company', $fields ) ) {
-				$customer_data['company'] = $customer->get_billing_company();
-			}
-			if ( in_array( 'city', $fields ) ) {
-				$customer_data['city'] = $customer->get_billing_city();
-			}
-			if ( in_array( 'street', $fields ) ) {
-				$customer_data['street'] = $customer->get_billing_address_1();
-			}
-			if ( in_array( 'postcode', $fields ) ) {
-				$customer_data['zip'] = $customer->get_billing_postcode();
-			}
-			if ( in_array( 'country', $fields ) ) {
-				$customer_data['country'] = $customer->get_billing_country();
-			}
-			if ( in_array( 'phone', $fields ) ) {
-				$customer_data['phone'] = $customer->get_billing_phone();
-			}
-
-			if ( $this->settings->get_option( 'api_source' ) ) {
-				$customer_data['source'] = $this->settings->get_option( 'api_source' );
-			}
-			$data[] = $customer_data;
+			$customer = new \WC_Customer( $user->ID );
+			$data[]   = $this->get_subscribe_data_from_object( $customer );
 		}
 
 		$request_data = array(
@@ -225,21 +337,144 @@ class Ecomail {
 			'trigger_autoresponders' => boolval( $this->settings->get_option( 'woocommerce_checkout_trigger_autoresponders' ) ),
 		);
 
-		return $this->ecomail_api->bulk_add_subscribers( $this->settings->get_option( 'woocommerce_checkout_list_id' ), $request_data );
+		$this->ecomail_api->bulk_add_subscribers( $this->settings->get_option( 'woocommerce_checkout_list_id' ), $request_data );
+
+		if ( count( $user_ids ) !== 0 ) {
+			$this->schedule_users_upload();
+		}
 	}
 
-	public function finish_bulk_import_users() {
-		delete_option( 'ecomail_users_upload_pending' );
+	/**
+	 * Bulk import orders.
+	 *
+	 * @throws \Exception
+	 */
+	public function bulk_import_orders() {
+		$order_ids           = get_option( self::OPTION_BULK_ORDERS_UPLOAD_IDS, array() );
+		$order_ids_to_import = array_splice( $order_ids, 0, self::SCHEDULE_ORDERS_LIMIT );
+		$this->update_ids_option( self::OPTION_BULK_ORDERS_UPLOAD_IDS, $order_ids );
+
+		if ( empty( $order_ids_to_import ) ) {
+			return;
+		}
+
+		$transactions = array();
+		/** Order model. @var WooOrderModel $order */
+		foreach ( $this->order_repository->find_by_ids( $order_ids_to_import ) as $order ) {
+			$transactions[] = $order->get_transaction_data();
+		}
+
+		if ( ! empty( $transactions ) ) {
+			$data = array(
+				'transaction_data' => $transactions,
+			);
+
+			$this->ecomail_api->bulk_add_transactions( $data );
+		}
+
+		if ( count( $order_ids ) !== 0 ) {
+			$this->schedule_orders_upload();
+		}
+	}
+
+	/**
+	 * Get subscribe data from WC Customer or WC Order.
+	 *
+	 * @param $object
+	 * @param $additional_data
+	 *
+	 * @return array
+	 */
+	public function get_subscribe_data_from_object( $object, $additional_data = array() ) {
+		$data = array();
+
+		if ( ! is_a( $object, 'WC_Customer' ) && ! is_a( $object, 'WC_Order' ) ) {
+			return $data;
+		}
+
+		$data['email'] = $object->get_billing_email();
+
+		$fields = $this->settings->get_option( 'woocommerce_checkout_subscribe_fields' );
+
+		if ( in_array( 'first_name', $fields ) ) {
+			$data['name'] = $object->get_billing_first_name();
+		}
+		if ( in_array( 'last_name', $fields ) ) {
+			$data['surname'] = $object->get_billing_last_name();
+		}
+		if ( in_array( 'company', $fields ) ) {
+			$data['company'] = $object->get_billing_company();
+		}
+		if ( in_array( 'city', $fields ) ) {
+			$data['city'] = $object->get_billing_city();
+		}
+		if ( in_array( 'street', $fields ) ) {
+			$data['street'] = $object->get_billing_address_1();
+		}
+		if ( in_array( 'postcode', $fields ) ) {
+			$data['zip'] = $object->get_billing_postcode();
+		}
+		if ( in_array( 'country', $fields ) ) {
+			$data['country'] = $object->get_billing_country();
+		}
+		if ( in_array( 'phone', $fields ) ) {
+			$data['phone'] = $object->get_billing_phone();
+		}
+
+		if ( $this->settings->get_option( 'api_source' ) ) {
+			$data['source'] = $this->settings->get_option( 'api_source' );
+		}
+
+		if ( is_array( $additional_data ) && ! empty( $additional_data ) ) {
+			$data = array_merge( $data, $additional_data );
+		}
+
+		return $data;
 	}
 
 	public function pending_bulk_upload_notice() {
-		if ( get_option( 'ecomail_users_upload_pending' ) ) {
+		if ( $this->is_import_running() ) {
 			?>
-			<div class="notice notice-warning">
-				<p><?php _e( 'The bulk upload of users to Ecomail is pending.', 'ecomail' ); ?></p>
-			</div>
+            <div class="notice notice-warning">
+                <p><?php echo esc_html( __( 'The bulk upload to Ecomail is pending.', 'ecomail-woocommerce' ) ); ?></p>
+            </div>
 			<?php
 		}
+	}
+
+	public function api_status_notice() {
+		global $pagenow;
+
+		if ( 'options-general.php' !== $pagenow && 'ecomail' !== filter_input( INPUT_GET, 'page' ) ) {
+			return;
+		}
+
+		$api_status = array(
+			'success' => true,
+		);
+		$response   = $this->ecomail_api->get_lists();
+		if ( is_wp_error( $response ) ) {
+			$api_status = array(
+				'success' => false,
+				'message' => $response->get_error_message(),
+			);
+		}
+
+		$status = ( $api_status['success'] ) ? 'success' : 'error';
+		?>
+        <div class="notice notice-<?php echo esc_html( $status ); ?>">
+
+            <p>
+				<?php printf(
+				/* Translators: %1$s API status, %2$s last request date */
+					esc_html( __( 'API connection status: %1$s, Last request: %2$s. %3$s', 'ecomail-woocommerce' ) ),
+					esc_html( $status ),
+					esc_html( wp_date( 'd. m. Y H:i:s' ) ),
+					esc_html( $api_status['message'] ?? '' ),
+				); ?>
+            </p>
+        </div>
+		<?php
 	}
 
 	public function is_disabled_by_cookie() {

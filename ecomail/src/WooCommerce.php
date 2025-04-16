@@ -2,6 +2,7 @@
 
 namespace Ecomail;
 
+use Ecomail\Models\WooOrderModel;
 use Ecomail\Repositories\SettingsRepository;
 use Ecomail\Repositories\WooOrderRepository;
 use WP_Error;
@@ -20,10 +21,10 @@ class WooCommerce {
 	private SettingsRepository $settings;
 
 	public function __construct(
-			Ecomail $ecomail,
-			EcomailApi $ecomail_api,
-			WooOrderRepository $order_repository,
-			SettingsRepository $settings
+		Ecomail $ecomail,
+		EcomailApi $ecomail_api,
+		WooOrderRepository $order_repository,
+		SettingsRepository $settings
 	) {
 		$this->ecomail          = $ecomail;
 		$this->ecomail_api      = $ecomail_api;
@@ -43,13 +44,18 @@ class WooCommerce {
 		add_action( 'woocommerce_before_pay_action', array( $this, 'handle_order_pay_form' ) );
 		add_action( 'woocommerce_add_to_cart', array( $this, 'add_update_cart_flag' ) );
 		add_action( 'ecomail_subscribe_contact', array( $this, 'subscribe_contact' ) );
+		add_action( 'ecomail_unsubscribe_contact', array( $this, 'unsubscribe_contact' ) );
 		add_action( 'ecomail_add_transaction', array( $this, 'add_transaction' ) );
 		add_action( 'ecomail_clear_cart', array( $this, 'clear_cart' ) );
 		add_action( 'woocommerce_checkout_after_terms_and_conditions', array( $this, 'add_checkbox' ) );
-		if ( $this->settings->get_option( 'woocommerce_cart_tracking' ) ) {
+		if ( $this->settings->get_option( 'woocommerce_cart_tracking', false ) ) {
 			add_action( 'woocommerce_cart_item_removed', array( $this, 'add_update_cart_flag' ) );
 			add_filter( 'woocommerce_update_cart_action_cart_updated', array( $this, 'cart_updated' ), 1000 );
 			add_action( 'wp_enqueue_scripts', array( $this, 'set_cart_tracking_data' ), 20 );
+		}
+		if ( $this->settings->get_option( 'woocommerce_order_tracking', false ) ) {
+			add_action( 'woocommerce_order_status_changed', array( $this, 'order_status_changed' ), 10, 3 );
+			add_action( 'ecomail_update_transaction_status', array( $this, 'update_transaction_status' ) );
 		}
 	}
 
@@ -59,11 +65,17 @@ class WooCommerce {
 	 * @param $order_id
 	 */
 	public function order_created( $order_id ) {
-		if ( $this->settings->get_option( 'woocommerce_checkout_subscribe' ) ) {
-			if ( ! $this->settings->get_option( 'woocommerce_checkout_subscribe_checkbox' )
-				 || ( ! empty( $_POST['ecomail_subscribe'] ) && $_POST['ecomail_subscribe'] )
+		if ( $this->settings->get_option( 'woocommerce_checkout_subscribe', false ) ) {
+			if (
+				! $this->settings->get_option( 'woocommerce_checkout_subscribe_checkbox', false ) ||
+				! filter_input( INPUT_POST, Ecomail::INPUT_NAME )
 			) {
 				as_schedule_single_action( time(), 'ecomail_subscribe_contact', array( 'order_id' => $order_id ) );
+			} elseif (
+				$this->settings->get_option( 'woocommerce_checkout_subscribe_checkbox', false ) &&
+				filter_input( INPUT_POST, Ecomail::INPUT_NAME )
+			) {
+				as_schedule_single_action( time(), 'ecomail_unsubscribe_contact', array( 'order_id' => $order_id ) );
 			}
 		}
 
@@ -78,6 +90,45 @@ class WooCommerce {
 		if ( $this->settings->get_option( 'woocommerce_cart_tracking' ) ) {
 			as_schedule_single_action( time(), 'ecomail_clear_cart', array( 'order_id' => $order_id ) );
 		}
+	}
+
+	/**
+	 * Handle order status change.
+	 *
+	 * @param $order_id
+	 * @param $old_status
+	 * @param $new_status
+	 *
+	 * @return void
+	 */
+	public function order_status_changed( $order_id, $old_status, $new_status ) {
+		$wc_order = wc_get_order( $order_id );
+		if ( $wc_order ) {
+			as_schedule_single_action( time(), 'ecomail_update_transaction_status', array( 'order_id' => $order_id ) );
+		}
+	}
+
+	/**
+	 * Update transaction status.
+	 *
+	 * @param $order_id
+	 *
+	 * @return void
+	 */
+	public function update_transaction_status( $order_id ) {
+		/** Order model. @var WooOrderModel $order */
+		$order    = $this->order_repository->get( $order_id );
+		$wc_order = $order->get_wc_order();
+
+		$data = array(
+			'transaction' => array(
+				'order_id' => $order_id,
+				'email'    => $wc_order->get_billing_email(),
+				'status'   => $order->get_ecomail_status(),
+			),
+		);
+
+		$this->ecomail_api->update_transaction( $order_id, $data );
 	}
 
 	/**
@@ -97,16 +148,34 @@ class WooCommerce {
 	 * @param $order_id
 	 */
 	public function subscribe_contact( $order_id ) {
+		/** Order model. @var WooOrderModel $order */
 		$order = $this->order_repository->get( $order_id );
 
 		$data = array(
-				'subscriber_data'        => $order->get_subscriber_data(),
-				'update_existing'        => boolval( $this->settings->get_option( 'woocommerce_checkout_update' ) ),
-				'skip_confirmation'      => boolval( $this->settings->get_option( 'woocommerce_checkout_skip_confirmation' ) ),
-				'trigger_autoresponders' => boolval( $this->settings->get_option( 'woocommerce_checkout_trigger_autoresponders' ) ),
+			'subscriber_data'        => $order->get_subscriber_data(),
+			'update_existing'        => boolval( $this->settings->get_option( 'woocommerce_checkout_update', false ) ),
+			'skip_confirmation'      => boolval( $this->settings->get_option( 'woocommerce_checkout_skip_confirmation', false ) ),
+			'trigger_autoresponders' => boolval( $this->settings->get_option( 'woocommerce_checkout_trigger_autoresponders', false ) ),
+			'resubscribe'            => boolval( $this->settings->get_option( 'woocommerce_checkout_resubscribe', false ) ),
 		);
 
 		$this->ecomail_api->add_subscriber( $this->settings->get_option( 'woocommerce_checkout_list_id' ), $data );
+	}
+
+	/**
+	 * Unsubscribe order contact
+	 *
+	 * @param $order_id
+	 */
+	public function unsubscribe_contact( $order_id ) {
+		/** Order model. @var WooOrderModel $order */
+		$order = $this->order_repository->get( $order_id );
+
+		$data = array(
+			'email' => $order->wc_order->get_billing_email(),
+		);
+
+		$this->ecomail_api->remove_subscriber( $this->settings->get_option( 'woocommerce_checkout_list_id' ), $data );
 	}
 
 	/**
@@ -115,6 +184,7 @@ class WooCommerce {
 	 * @param $order_id
 	 */
 	public function add_transaction( $order_id ) {
+		/** Order model. @var WooOrderModel $order */
 		$order = $this->order_repository->get( $order_id );
 
 		$this->ecomail_api->add_transaction( $order->get_transaction_data() );
@@ -154,11 +224,11 @@ class WooCommerce {
 		}
 
 		wp_localize_script(
-				'ecomail',
-				'ecomailCart',
-				array(
-						'items' => $items,
-				)
+			'ecomail',
+			'ecomailCart',
+			array(
+				'items' => $items,
+			)
 		);
 	}
 
@@ -173,17 +243,17 @@ class WooCommerce {
 		}
 
 		return array_values(
-				array_map(
-						function ( $item ) {
-							$product_id = $item['variation_id'] ?: $item['product_id'];
+			array_map(
+				function ( $item ) {
+					$product_id = $item['variation_id'] ?: $item['product_id'];
 
-							return array(
-									'product_id' => $product_id,
-									'price'      => round( ( $item['line_total'] + $item['line_tax'] ) / $item['quantity'], wc_get_price_decimals() ),
-							);
-						},
-						WC()->cart->get_cart()
-				)
+					return array(
+						'product_id' => $product_id,
+						'price'      => round( ( $item['line_total'] + $item['line_tax'] ) / $item['quantity'], wc_get_price_decimals() ),
+					);
+				},
+				WC()->cart->get_cart()
+			)
 		);
 	}
 
@@ -233,12 +303,12 @@ class WooCommerce {
 		foreach ( (array) $items as $item ) {
 			$prod       = wc_get_product( $item['product_id'] );
 			$products[] = array(
-					'productId'   => $item['product_id'],
-					'img_url'     => wp_get_attachment_image_url( $prod->get_image_id(), 'full' ),
-					'url'         => $prod->get_permalink(),
-					'name'        => $prod->get_name(),
-					'price'       => $item['price'],
-					'description' => $prod->get_short_description() ? wp_strip_all_tags( $prod->get_short_description() ) : wp_strip_all_tags( $prod->get_description() ),
+				'productId'   => $item['product_id'],
+				'img_url'     => wp_get_attachment_image_url( $prod->get_image_id(), 'full' ),
+				'url'         => $prod->get_permalink(),
+				'name'        => $prod->get_name(),
+				'price'       => $item['price'],
+				'description' => $prod->get_short_description() ? wp_strip_all_tags( $prod->get_short_description() ) : wp_strip_all_tags( $prod->get_description() ),
 			);
 		}
 
@@ -262,21 +332,21 @@ class WooCommerce {
 			return;
 		}
 		?>
-		<p class="form-row">
-			<label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
-				<input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox"
-					   name="ecomail_subscribe"
-						<?php
-						checked( isset( $_POST['ecomail_subscribe'] ), true ); // WPCS: input var ok, csrf ok.
-						?>
-				/>
-				<span class="woocommerce-terms-and-conditions-checkbox-text">
+        <p class="form-row">
+            <label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
+                <input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox"
+                       name="<?php echo esc_html( Ecomail::INPUT_NAME ); ?>"
+					<?php
+					checked( filter_input( INPUT_POST, Ecomail::INPUT_NAME ), true ); // WPCS: input var ok, csrf ok.
+					?>
+                />
+                <span class="woocommerce-terms-and-conditions-checkbox-text">
 				<?php
-				echo sanitize_text_field( $this->settings->get_option( 'woocommerce_checkout_subscribe_text' ) );
+				echo esc_html( sanitize_text_field( $this->settings->get_option( 'woocommerce_checkout_not_subscribe_text' ) ) );
 				?>
 					</span>&nbsp
-			</label>
-		</p>
+            </label>
+        </p>
 		<?php
 	}
 }

@@ -48,7 +48,7 @@ class EcomailApi {
 	 * Add Subscriber
 	 *
 	 * @param       $list_id
-	 * @param array   $data
+	 * @param array $data
 	 *
 	 * @return WP_Error
 	 */
@@ -58,12 +58,25 @@ class EcomailApi {
 		return $this->handle_response( $this->api->addSubscriber( $list_id, $data ) );
 	}
 
+	/**
+	 * Remove Subscriber
+	 *
+	 * @param       $list_id
+	 * @param array $data
+	 *
+	 * @return WP_Error
+	 */
+	public function remove_subscriber( $list_id, array $data ) {
+		$this->initialize();
+
+		return $this->handle_response( $this->api->removeSubscriber( $list_id, $data ) );
+	}
 
 	/**
 	 * Bulk Add Subscribers
 	 *
 	 * @param       $list_id
-	 * @param array   $data
+	 * @param array $data
 	 *
 	 * @return WP_Error
 	 */
@@ -71,6 +84,19 @@ class EcomailApi {
 		$this->initialize();
 
 		return $this->handle_response( $this->api->addSubscriberBulk( $list_id, $data ) );
+	}
+
+	/**
+	 * Bulk Add Transactions
+	 *
+	 * @param array $data
+	 *
+	 * @return WP_Error
+	 */
+	public function bulk_add_transactions( array $data ) {
+		$this->initialize();
+
+		return $this->handle_response( $this->api->createBulkTransactions( $data ) );
 	}
 
 	/**
@@ -84,6 +110,20 @@ class EcomailApi {
 		$this->initialize();
 
 		return $this->handle_response( $this->api->createNewTransaction( $data ) );
+	}
+
+	/**
+	 * Update transaction
+	 *
+	 * @param int $order_id
+	 * @param array $data
+	 *
+	 * @return WP_Error
+	 */
+	public function update_transaction( int $order_id, array $data ) {
+		$this->initialize();
+
+		return $this->handle_response( $this->api->updateTransaction( $order_id, $data ) );
 	}
 
 	/**

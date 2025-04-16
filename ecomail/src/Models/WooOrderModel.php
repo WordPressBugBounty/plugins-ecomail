@@ -2,7 +2,7 @@
 
 namespace Ecomail\Models;
 
-use Ecomail\Repositories\SettingsRepository;
+use Ecomail\Ecomail;
 use EcomailDeps\Wpify\Model\Order;
 use EcomailDeps\Wpify\Model\OrderItemLine;
 
@@ -41,41 +41,8 @@ class WooOrderModel extends Order {
 	 */
 	public function get_subscriber_data(): array {
 		$wc_order = $this->get_wc_order();
-		$data     = array(
-			'email' => $wc_order->get_billing_email(),
-		);
-
-		$settings = ecomail_container()->get( SettingsRepository::class );
-		$fields   = $settings->get_option( 'woocommerce_checkout_subscribe_fields' );
-
-		if ( in_array( 'first_name', $fields ) ) {
-			$data['name'] = $wc_order->get_billing_first_name();
-		}
-		if ( in_array( 'last_name', $fields ) ) {
-			$data['surname'] = $wc_order->get_billing_last_name();
-		}
-		if ( in_array( 'company', $fields ) ) {
-			$data['company'] = $wc_order->get_billing_company();
-		}
-		if ( in_array( 'city', $fields ) ) {
-			$data['city'] = $wc_order->get_billing_city();
-		}
-		if ( in_array( 'street', $fields ) ) {
-			$data['street'] = $wc_order->get_billing_address_1();
-		}
-		if ( in_array( 'postcode', $fields ) ) {
-			$data['zip'] = $wc_order->get_billing_postcode();
-		}
-		if ( in_array( 'country', $fields ) ) {
-			$data['country'] = $wc_order->get_billing_country();
-		}
-		if ( in_array( 'phone', $fields ) ) {
-			$data['phone'] = $wc_order->get_billing_phone();
-		}
-
-		if ( $settings->get_option( 'api_source' ) ) {
-			$data['source'] = $settings->get_option( 'api_source' );
-		}
+		$ecomail  = ecomail_container()->get( Ecomail::class );
+		$data     = $ecomail->get_subscribe_data_from_object( $wc_order, array( 'tags' => array( 'woo_order' ) ) );
 
 		return apply_filters( 'ecomail_order_subscriber_data', $data, $this, $wc_order );
 	}
@@ -84,7 +51,7 @@ class WooOrderModel extends Order {
 		$wc_order = $this->get_wc_order();
 		$data     = array(
 			'transaction' => array(
-				'order_id'  => $wc_order->get_id(),
+				'order_id'  => (string) $wc_order->get_id(),
 				'email'     => $wc_order->get_billing_email(),
 				'shop'      => site_url(),
 				'amount'    => $wc_order->get_total() - $wc_order->get_total_tax(),
@@ -93,6 +60,7 @@ class WooOrderModel extends Order {
 				'city'      => $wc_order->get_billing_city(),
 				'country'   => $wc_order->get_billing_country(),
 				'timestamp' => $wc_order->get_date_created()->getTimestamp(),
+				'status'    => $this->get_ecomail_status(),
 			),
 		);
 
@@ -116,5 +84,25 @@ class WooOrderModel extends Order {
 		}
 
 		return apply_filters( 'ecomail_order_transaction_data', $data, $this, $wc_order );
+	}
+
+	/**
+	 * Get ecomail status.
+	 */
+	public function get_ecomail_status() {
+		$wc_order = $this->get_wc_order();
+		$status   = $wc_order->get_status();
+
+		if ( 'cancelled' === $status ) {
+			return 'canceled';
+		} elseif ( in_array( $status, array(
+			'processing',
+			'pending',
+			'completed',
+		) ) ) {
+			return $status;
+		}
+
+		return null;
 	}
 }

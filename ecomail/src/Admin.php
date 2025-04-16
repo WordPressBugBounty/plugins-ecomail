@@ -19,7 +19,7 @@ class Admin {
 
 	public function add_action_links( $links ) {
 		$before = array(
-			'settings' => sprintf( '<a href="%s">%s</a>', admin_url( 'options-general.php?page=ecomail' ), __( 'Settings', 'ecomail' ) ),
+			'settings' => sprintf( '<a href="%s">%s</a>', admin_url( 'options-general.php?page=ecomail' ), __( 'Settings', 'ecomail-woocommerce' ) ),
 		);
 		return array_merge( $before, $links );
 	}
