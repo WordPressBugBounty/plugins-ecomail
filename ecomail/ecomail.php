@@ -2,9 +2,9 @@
 /*
  * Plugin Name:          Ecomail
  * Description:          Official Ecomail integration for WordPress and WooCommerce
- * Version:              2.2.1
- * Requires PHP:         7.4.0
- * Requires at least:    5.3.0
+ * Version:              2.3.0
+ * Requires PHP:         8.1.0
+ * Requires at least:    6.5
  * Author:               ECOMAIL.CZ
  * Author URI:           https://ecomail.cz/
  * License:              GPL v2 or later
@@ -21,7 +21,7 @@ use EcomailDeps\DI\Container;
 use EcomailDeps\DI\ContainerBuilder;
 
 if ( ! defined( 'ECOMAIL_MIN_PHP_VERSION' ) ) {
-	define( 'ECOMAIL_MIN_PHP_VERSION', '7.4.0' );
+	define( 'ECOMAIL_MIN_PHP_VERSION', '8.1.0' );
 }
 
 /**
