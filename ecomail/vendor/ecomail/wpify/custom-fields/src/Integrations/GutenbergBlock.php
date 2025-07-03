@@ -232,7 +232,18 @@ class GutenbergBlock extends BaseIntegration
         $this->parent = $args['parent'] ?? null;
         $this->ancestor = $args['ancestor'] ?? null;
         $this->allowed_blocks = $args['allowed_blocks'] ?? null;
-        $this->icon = $args['icon'] ?? null;
+        if (!empty($args['icon']) && file_exists($args['icon'])) {
+            global $wp_filesystem;
+            if (empty($wp_filesystem)) {
+                require_once \ABSPATH . 'wp-admin/includes/file.php';
+                WP_Filesystem();
+            }
+            $this->icon = $wp_filesystem->get_contents($args['icon']);
+        } elseif (!empty($args['icon'])) {
+            $this->icon = $args['icon'];
+        } else {
+            $this->icon = null;
+        }
         $this->description = $args['description'] ?? '';
         $this->keywords = $args['keywords'] ?? array();
         $this->textdomain = $args['textdomain'] ?? null;

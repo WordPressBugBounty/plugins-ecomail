@@ -184,7 +184,7 @@ class Ecomail {
 		}
 
 		$this->add_user_ids_to_list();
-		wp_safe_redirect( admin_url() );
+		wp_safe_redirect( $this->settings->get_settings_url() );
 	}
 
 	/**
@@ -198,7 +198,7 @@ class Ecomail {
 		}
 
 		$this->add_user_ids_to_list( 1, true );
-		wp_safe_redirect( admin_url() );
+		wp_safe_redirect( $this->settings->get_settings_url() );
 	}
 
 	/**
@@ -392,7 +392,20 @@ class Ecomail {
 			return $data;
 		}
 
-		$data['email'] = $object->get_billing_email();
+		$email = $object->get_billing_email();
+		if ( ! $email ) {
+			if ( is_a( $object, 'WC_Customer' ) ) {
+				$email = $object->get_email();
+			} else {
+				$email = $object->get_user()->user_email;
+			}
+		}
+		if ( ! $email ) {
+			return $data;
+		}
+
+
+		$data['email'] = $email;
 
 		$fields = $this->settings->get_option( 'woocommerce_checkout_subscribe_fields' );
 

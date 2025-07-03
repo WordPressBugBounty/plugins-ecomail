@@ -117,18 +117,9 @@ class WooCommerce {
 	 */
 	public function update_transaction_status( $order_id ) {
 		/** Order model. @var WooOrderModel $order */
-		$order    = $this->order_repository->get( $order_id );
-		$wc_order = $order->get_wc_order();
+		$order = $this->order_repository->get( $order_id );
 
-		$data = array(
-			'transaction' => array(
-				'order_id' => $order_id,
-				'email'    => $wc_order->get_billing_email(),
-				'status'   => $order->get_ecomail_status(),
-			),
-		);
-
-		$this->ecomail_api->update_transaction( $order_id, $data );
+		$this->ecomail_api->update_transaction( $order_id, $order->get_transaction_data() );
 	}
 
 	/**
@@ -148,18 +139,7 @@ class WooCommerce {
 	 * @param $order_id
 	 */
 	public function subscribe_contact( $order_id ) {
-		/** Order model. @var WooOrderModel $order */
-		$order = $this->order_repository->get( $order_id );
-
-		$data = array(
-			'subscriber_data'        => $order->get_subscriber_data(),
-			'update_existing'        => boolval( $this->settings->get_option( 'woocommerce_checkout_update', false ) ),
-			'skip_confirmation'      => boolval( $this->settings->get_option( 'woocommerce_checkout_skip_confirmation', false ) ),
-			'trigger_autoresponders' => boolval( $this->settings->get_option( 'woocommerce_checkout_trigger_autoresponders', false ) ),
-			'resubscribe'            => boolval( $this->settings->get_option( 'woocommerce_checkout_resubscribe', false ) ),
-		);
-
-		$this->ecomail_api->add_subscriber( $this->settings->get_option( 'woocommerce_checkout_list_id' ), $data );
+		$this->submit_order_data( $order_id, true );
 	}
 
 	/**
@@ -168,14 +148,27 @@ class WooCommerce {
 	 * @param $order_id
 	 */
 	public function unsubscribe_contact( $order_id ) {
+		$this->submit_order_data( $order_id, false );
+	}
+
+	private function submit_order_data( int $order_id, bool $subscribe ): void {
 		/** Order model. @var WooOrderModel $order */
 		$order = $this->order_repository->get( $order_id );
 
+		$tags = ( $subscribe ) ? array( 'wp_order', 'wp_newsletter' ) : array( 'wp_order' );
+
+		$subscriber_data           = $order->get_subscriber_data( $tags );
+		$subscriber_data['status'] = ( $subscribe ) ? 1 : 2;
+
 		$data = array(
-			'email' => $order->wc_order->get_billing_email(),
+			'subscriber_data'        => $subscriber_data,
+			'update_existing'        => boolval( $this->settings->get_option( 'woocommerce_checkout_update', false ) ),
+			'skip_confirmation'      => boolval( $this->settings->get_option( 'woocommerce_checkout_skip_confirmation', false ) ),
+			'trigger_autoresponders' => boolval( $this->settings->get_option( 'woocommerce_checkout_trigger_autoresponders', false ) ),
+			'resubscribe'            => boolval( $this->settings->get_option( 'woocommerce_checkout_resubscribe', false ) ),
 		);
 
-		$this->ecomail_api->remove_subscriber( $this->settings->get_option( 'woocommerce_checkout_list_id' ), $data );
+		$this->ecomail_api->add_subscriber( $this->settings->get_option( 'woocommerce_checkout_list_id' ), $data );
 	}
 
 	/**

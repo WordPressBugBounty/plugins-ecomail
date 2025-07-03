@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'ecomailcz/ecomail-woocommerce',
-        'pretty_version' => '2.3.0',
-        'version' => '2.3.0.0',
-        'reference' => 'bdf40b6a31d4f4f30b52f75e48ef18b6ba379826',
+        'pretty_version' => '2.3.1',
+        'version' => '2.3.1.0',
+        'reference' => 'a9cf1e1911084e76b389ed1d072ead4e9007c8f4',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'ecomailcz/ecomail-woocommerce' => array(
-            'pretty_version' => '2.3.0',
-            'version' => '2.3.0.0',
-            'reference' => 'bdf40b6a31d4f4f30b52f75e48ef18b6ba379826',
+            'pretty_version' => '2.3.1',
+            'version' => '2.3.1.0',
+            'reference' => 'a9cf1e1911084e76b389ed1d072ead4e9007c8f4',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

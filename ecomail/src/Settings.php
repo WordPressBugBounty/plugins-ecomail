@@ -36,7 +36,7 @@ class Settings {
 		$this->wcf     = $wcf;
 		$this->ecomail = $ecomail;
 
-		$this->setup();
+		add_action( 'init', array( $this, 'setup' ) );
 	}
 
 	public function setup() {
@@ -109,7 +109,7 @@ class Settings {
 					'type'        => 'select',
 					'title'       => __( 'List for checkout subscriptions', 'ecomail-woocommerce' ),
 					'description' => sprintf(
-						/* Translators: %s URL */
+					/* Translators: %s URL */
 						__( 'Select the list that you want to subscribe the customers on checkout. Click <a href="%s">here</a> to refresh the lists', 'ecomail-woocommerce' ),
 						add_query_arg( array( 'action' => 'ecomail_refresh_lists' ), admin_url() )
 					),
@@ -213,6 +213,7 @@ class Settings {
 						'<strong>The settings above will be used (List ID, fields), please make sure to save the settings first before clicking on the Bulk upload button.</strong> The users will be uploaded in background, in batches of 500.',
 						'ecomail-woocommerce'
 					),
+					'target'      => '_self',
 				),
 				array(
 					'id'          => 'bulk_upload_existing_customers_and_orders',
@@ -223,6 +224,7 @@ class Settings {
 						'<strong>The settings above will be used (List ID, fields), please make sure to save the settings first before clicking on the Bulk upload button.</strong> The users and orders will be uploaded in background, in batches of 500.',
 						'ecomail-woocommerce'
 					),
+					'target'      => '_self',
 				),
 				array(
 					'type'  => 'title',

@@ -16,7 +16,7 @@ use EcomailDeps\Wpify\Model\Interfaces\ModelInterface;
  */
 class PostRepository extends Repository
 {
-    private ?WP_Query $query;
+    protected ?WP_Query $query;
     /**
      * Returns the model class name.
      *

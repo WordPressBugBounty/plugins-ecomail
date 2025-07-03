@@ -169,7 +169,7 @@ class Options extends OptionsIntegration
      *
      * Initializes an Options object, validates required arguments, and sets up action hooks.
      *
-     * @param array        $args Arguments for the options page.
+     * @param array        $args          Arguments for the options page.
      * @param CustomFields $custom_fields The custom fields object.
      *
      * @throws MissingArgumentException If required arguments are missing or invalid.
@@ -317,6 +317,7 @@ class Options extends OptionsIntegration
         if ($this->type === $this::TYPE_NETWORK) {
             $action = add_query_arg('action', $this->get_network_save_action(), 'edit.php');
         }
+        do_action('wpifycf_before_options_form', $this);
         ?>
 			<form action="<?php 
         echo esc_attr($action);
@@ -341,6 +342,9 @@ class Options extends OptionsIntegration
         }
         ?>
 			</form>
+			<?php 
+        do_action('wpifycf_after_options_form', $this);
+        ?>
 		</div>
 		<?php 
         do_action('wpifycf_after_options', $this);
@@ -439,7 +443,7 @@ class Options extends OptionsIntegration
      * If the 'section' key is missing from the item, it will default to 'general'.
      * Additionally, the method utilizes a parent class method for primary normalization.
      *
-     * @param array  $item The item to be normalized.
+     * @param array  $item      The item to be normalized.
      * @param string $global_id An optional global identifier.
      *
      * @return array The normalized item with an ensured 'section' key.
@@ -476,7 +480,7 @@ class Options extends OptionsIntegration
     /**
      * Retrieves an option value based on the context of the object. If the type is network, it fetches a network option; otherwise, it fetches a regular option.
      *
-     * @param string $name The name of the option to retrieve.
+     * @param string $name          The name of the option to retrieve.
      * @param mixed  $default_value The default value to return if the option does not exist.
      *
      * @return mixed The value of the option or the default value if the option does not exist.
@@ -495,7 +499,7 @@ class Options extends OptionsIntegration
      * This function updates the value of an option, either at the network level
      * or at the regular single instance level, depending on the context of the type.
      *
-     * @param string $name The name of the option to be updated.
+     * @param string $name  The name of the option to be updated.
      * @param mixed  $value The new value to set for the specified option.
      *
      * @return bool True if the option was successfully updated, false otherwise.

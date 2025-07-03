@@ -39,10 +39,10 @@ class WooOrderModel extends Order {
 	/**
 	 * @return array
 	 */
-	public function get_subscriber_data(): array {
+	public function get_subscriber_data( array $tags = array() ): array {
 		$wc_order = $this->get_wc_order();
 		$ecomail  = ecomail_container()->get( Ecomail::class );
-		$data     = $ecomail->get_subscribe_data_from_object( $wc_order, array( 'tags' => array( 'woo_order' ) ) );
+		$data     = $ecomail->get_subscribe_data_from_object( $wc_order, array( 'tags' => $tags ) );
 
 		return apply_filters( 'ecomail_order_subscriber_data', $data, $this, $wc_order );
 	}

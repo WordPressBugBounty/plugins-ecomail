@@ -24,10 +24,13 @@ abstract class OptionsIntegration extends BaseIntegration
      */
     public function print_app(string $context, array $tabs, array $data_attributes = array()): void
     {
+        if (!apply_filters('wpifycf_print_app', \true, $this, $context, $tabs, $data_attributes)) {
+            return;
+        }
         $loop = $data_attributes['loop'] ?? '';
         $integration_id = isset($data_attributes['loop']) ? $this->id . '__' . $loop : $this->id;
         ?>
-		<div class="wpifycf-app"
+		<div class="wpifycf-app-instance"
 			data-loaded="false"
 			data-instance="<?php 
         echo esc_attr($this->custom_fields->get_script_handle());
@@ -85,7 +88,11 @@ abstract class OptionsIntegration extends BaseIntegration
 		data-integration-id="<?php 
         echo esc_attr($integration_id);
         ?>"
-		class="wpifycf-field-parent<?php 
+		data-instance="<?php 
+        echo esc_attr($this->custom_fields->get_script_handle());
+        ?>"
+		class="wpifycf-field-instance wpifycf-field-instance--<?php 
+        echo esc_attr($this->custom_fields->get_script_handle());
         echo $class_name ? ' ' . esc_attr($class_name) : '';
         ?>"
 		<?php 

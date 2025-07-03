@@ -170,6 +170,8 @@ class Metabox extends ItemsIntegration
         if (defined('EcomailDeps\DOING_AUTOSAVE') && DOING_AUTOSAVE) {
             return;
         }
+        $post_id = $_POST['ID'] ?? $_POST['post_ID'] ?? $post_id;
+        $post = get_post($post_id);
         if (isset($_POST['post_type']) && !in_array($_POST['post_type'], $this->post_types, \true)) {
             return;
         }

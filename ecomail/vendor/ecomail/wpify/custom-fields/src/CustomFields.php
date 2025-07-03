@@ -308,7 +308,7 @@ class CustomFields
      */
     public function get_script_handle(): string
     {
-        return 'wpifycf-' . str_replace('/', '-', $this->get_api_basename());
+        return 'wpifycf_' . str_replace('/', '_', $this->get_api_basename());
     }
     /**
      * Sanitizes a given item's value based on its type using a closure.
@@ -338,7 +338,7 @@ class CustomFields
                 $sanitized_value = $value;
             } elseif ('color' === $item['type']) {
                 $sanitized_value = sanitize_hex_color($value);
-            } elseif (in_array($item['type'], array('date', 'datetime', 'month', 'password', 'select', 'tel', 'text', 'time', 'week'), \true)) {
+            } elseif (in_array($item['type'], array('date', 'datetime', 'month', 'password', 'select', 'radio', 'tel', 'text', 'time', 'week'), \true)) {
                 $sanitized_value = sanitize_text_field($value);
             } elseif ('email' === $item['type']) {
                 $sanitized_value = sanitize_email($value);
