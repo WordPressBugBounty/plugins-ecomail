@@ -67,13 +67,14 @@ class WooCommerce {
 	public function order_created( $order_id ) {
 		if ( $this->settings->get_option( 'woocommerce_checkout_subscribe', false ) ) {
 			if (
-				! $this->settings->get_option( 'woocommerce_checkout_subscribe_checkbox', false ) ||
+				! $this->settings->get_option( 'woocommerce_checkout_subscribe_checkbox', false )
+				||
 				! filter_input( INPUT_POST, Ecomail::INPUT_NAME )
 			) {
 				as_schedule_single_action( time(), 'ecomail_subscribe_contact', array( 'order_id' => $order_id ) );
 			} elseif (
-				$this->settings->get_option( 'woocommerce_checkout_subscribe_checkbox', false ) &&
-				filter_input( INPUT_POST, Ecomail::INPUT_NAME )
+				$this->settings->get_option( 'woocommerce_checkout_subscribe_checkbox', false )
+				&& filter_input( INPUT_POST, Ecomail::INPUT_NAME )
 			) {
 				as_schedule_single_action( time(), 'ecomail_unsubscribe_contact', array( 'order_id' => $order_id ) );
 			}
@@ -157,7 +158,14 @@ class WooCommerce {
 
 		$tags = ( $subscribe ) ? array( 'wp_order', 'wp_newsletter' ) : array( 'wp_order' );
 
-		$subscriber_data           = $order->get_subscriber_data( $tags );
+		$subscriber_data = $order->get_subscriber_data( $tags );
+		// Merge the existing tags.
+		$subscriber = $this->ecomail_api->get_subscriber( $this->settings->get_option( 'woocommerce_checkout_list_id' ), $subscriber_data['email'] );
+		if ( $subscriber && ! is_wp_error( $subscriber ) && ! empty( $subscriber['subscriber'] ) ) {
+			$existing_tags           = ! empty( $subscriber['subscriber']['tags'] ) ? $subscriber['subscriber']['tags'] : [];
+			$subscriber_data['tags'] = array_unique( array_merge( $existing_tags, $tags ) );
+		}
+
 		$subscriber_data['status'] = ( $subscribe ) ? 1 : 2;
 
 		$data = array(
@@ -325,21 +333,21 @@ class WooCommerce {
 			return;
 		}
 		?>
-        <p class="form-row">
-            <label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
-                <input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox"
-                       name="<?php echo esc_html( Ecomail::INPUT_NAME ); ?>"
+		<p class="form-row">
+			<label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
+				<input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox"
+					   name="<?php echo esc_html( Ecomail::INPUT_NAME ); ?>"
 					<?php
 					checked( filter_input( INPUT_POST, Ecomail::INPUT_NAME ), true ); // WPCS: input var ok, csrf ok.
 					?>
-                />
-                <span class="woocommerce-terms-and-conditions-checkbox-text">
+				/>
+				<span class="woocommerce-terms-and-conditions-checkbox-text">
 				<?php
 				echo esc_html( sanitize_text_field( $this->settings->get_option( 'woocommerce_checkout_not_subscribe_text' ) ) );
 				?>
 					</span>&nbsp
-            </label>
-        </p>
+			</label>
+		</p>
 		<?php
 	}
 }

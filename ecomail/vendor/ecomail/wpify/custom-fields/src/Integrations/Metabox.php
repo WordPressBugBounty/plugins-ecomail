@@ -193,10 +193,11 @@ class Metabox extends ItemsIntegration
     public function register_meta(): void
     {
         $items = $this->normalize_items($this->items);
-        foreach ($items as $item) {
-            foreach ($this->post_types as $post_type) {
+        foreach ($this->post_types as $post_type) {
+            foreach ($items as $item) {
                 register_post_meta($post_type, $item['id'], array('type' => $this->custom_fields->get_wp_type($item), 'description' => $item['label'], 'single' => \true, 'default' => $this->custom_fields->get_default_value($item), 'sanitize_callback' => $this->custom_fields->sanitize_item_value($item), 'show_in_rest' => \false));
             }
+            add_action('wpifycf_register_post_meta', $items, $post_type);
         }
     }
     /**

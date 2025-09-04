@@ -77,10 +77,10 @@ class TermRepository extends Repository
         $data = array();
         $taxonomy = $model->taxonomy ?? $this->taxonomy();
         if ($model->id > 0) {
-            $result = wp_update_term($model->id, $taxonomy, array('name' => $model->name, 'slug' => $model->slug, 'term_group' => $model->group, 'description' => $model->description, 'parent' => $model->parent, 'alias_of' => $model->alias_of));
+            $result = wp_update_term($model->id, $taxonomy, array('name' => $model->name, 'slug' => $model->slug, 'term_group' => $model->group, 'description' => $model->description, 'parent' => $model->parent_id, 'alias_of' => $model->alias_of));
             $action = 'update';
         } else {
-            $result = wp_insert_term($model->name, $taxonomy, array('slug' => $model->slug, 'term_group' => $model->group, 'description' => $model->description, 'parent' => $model->parent, 'alias_of' => $model->alias_of));
+            $result = wp_insert_term($model->name, $taxonomy, array('slug' => $model->slug, 'term_group' => $model->group, 'description' => $model->description, 'parent' => $model->parent_id, 'alias_of' => $model->alias_of));
             $action = 'insert';
         }
         if (is_wp_error($result)) {

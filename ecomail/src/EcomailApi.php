@@ -45,6 +45,17 @@ class EcomailApi {
 	}
 
 	/**
+	 * Get Ecomail Lists
+	 *
+	 * @return WP_Error
+	 */
+	public function get_subscriber( $list_id, $email ) {
+		$this->initialize();
+
+		return $this->handle_response( $this->api->getSubscriber( $list_id, $email ) );
+	}
+
+	/**
 	 * Add Subscriber
 	 *
 	 * @param       $list_id
@@ -115,7 +126,7 @@ class EcomailApi {
 	/**
 	 * Update transaction
 	 *
-	 * @param int $order_id
+	 * @param int   $order_id
 	 * @param array $data
 	 *
 	 * @return WP_Error

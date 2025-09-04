@@ -282,6 +282,7 @@ class GutenbergBlock extends BaseIntegration
             $args['render_callback'] = array($this, 'render');
         }
         register_block_type($this->name, $args);
+        do_action('wpifycf_register_block', $this->name, array(...$args, 'items' => $this->normalize_items($this->items)));
     }
     /**
      * Enqueue the script and dispatch a custom event with the block data.
