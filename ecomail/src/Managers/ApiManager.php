@@ -15,7 +15,15 @@ final class ApiManager {
 		add_action( 'init', array( $this, 'enable_wc_frontend_in_rest' ) );
 	}
 
+	public function get_rest_url(): string {
+		return rest_url( $this::REST_NAMESPACE );
+	}
+
 	public function enable_wc_frontend_in_rest() {
+		if ( ! function_exists( 'WC' ) || ! WC() ) {
+			return;
+		}
+
 		if ( ! WC()->is_rest_api_request() ) {
 			return;
 		}
@@ -26,6 +34,8 @@ final class ApiManager {
 			wc_load_cart();
 		}
 
-		WC()->session->set_customer_session_cookie( true );
+		if ( WC()->session ) {
+			WC()->session->set_customer_session_cookie( true );
+		}
 	}
 }

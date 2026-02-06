@@ -302,7 +302,7 @@ class Native implements Serializable
                     }
                     $item = $property->getValue($data);
                     if ($item instanceof SerializableClosure || $item instanceof UnsignedSerializableClosure || $item instanceof SelfReference && $item->hash === $this->code['self']) {
-                        $this->code['objects'][] = ['instance' => $data, 'property' => $property, 'object' => ($item instanceof SelfReference) ? $this : $item];
+                        $this->code['objects'][] = ['instance' => $data, 'property' => $property, 'object' => $item instanceof SelfReference ? $this : $item];
                     } elseif (is_array($item) || is_object($item)) {
                         $this->mapPointers($item);
                         $property->setValue($data, $item);

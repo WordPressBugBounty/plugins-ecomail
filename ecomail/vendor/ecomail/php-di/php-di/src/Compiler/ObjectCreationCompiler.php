@@ -136,7 +136,7 @@ PHP;
         if ($definition->isInstantiable()) {
             return;
         }
-        $message = (!$definition->classExists()) ? 'Entry "%s" cannot be compiled: the class doesn\'t exist' : 'Entry "%s" cannot be compiled: the class is not instantiable';
+        $message = !$definition->classExists() ? 'Entry "%s" cannot be compiled: the class doesn\'t exist' : 'Entry "%s" cannot be compiled: the class is not instantiable';
         throw InvalidDefinition::create($definition, sprintf($message, $definition->getName()));
     }
 }

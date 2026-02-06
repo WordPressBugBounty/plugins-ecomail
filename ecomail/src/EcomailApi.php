@@ -3,6 +3,7 @@
 namespace Ecomail;
 
 use Ecomail\Repositories\SettingsRepository;
+use EcomailDeps\Wpify\Log\RotatingFileLog;
 use WP_Error;
 
 class EcomailApi {
@@ -17,7 +18,7 @@ class EcomailApi {
 	 */
 	private $settings;
 
-	public function __construct( SettingsRepository $settings ) {
+	public function __construct( SettingsRepository $settings, private RotatingFileLog $log ) {
 		$this->settings = $settings;
 	}
 
@@ -41,7 +42,7 @@ class EcomailApi {
 	public function get_lists() {
 		$this->initialize();
 
-		return $this->handle_response( $this->api->getListsCollection() );
+		return $this->handle_response( $this->api->getListsCollection(), 'GET /lists' );
 	}
 
 	/**
@@ -52,7 +53,9 @@ class EcomailApi {
 	public function get_subscriber( $list_id, $email ) {
 		$this->initialize();
 
-		return $this->handle_response( $this->api->getSubscriber( $list_id, $email ) );
+		return $this->handle_response( $this->api->getSubscriber( $list_id, $email ),
+			'GET /subscribers', [ 'email' => $email ]
+		);
 	}
 
 	/**
@@ -66,7 +69,33 @@ class EcomailApi {
 	public function add_subscriber( $list_id, array $data ) {
 		$this->initialize();
 
-		return $this->handle_response( $this->api->addSubscriber( $list_id, $data ) );
+		return $this->handle_response( $this->api->addSubscriber( $list_id, $data ),
+			'POST /lists/{list_id}/subscribe',
+			[
+				'list_id' => $list_id,
+				'data'    => $data
+			]
+		);
+	}
+
+	/**
+	 * Add Subscriber
+	 *
+	 * @param       $list_id
+	 * @param array $data
+	 *
+	 * @return WP_Error
+	 */
+	public function update_subscriber( $list_id, array $data ) {
+		$this->initialize();
+
+		return $this->handle_response( $this->api->updateSubscriber( $list_id, $data ),
+			'POST /lists/{list_id}/update-subscriber',
+			[
+				'list_id' => $list_id,
+				'data'    => $data
+			]
+		);
 	}
 
 	/**
@@ -80,7 +109,13 @@ class EcomailApi {
 	public function remove_subscriber( $list_id, array $data ) {
 		$this->initialize();
 
-		return $this->handle_response( $this->api->removeSubscriber( $list_id, $data ) );
+		return $this->handle_response( $this->api->removeSubscriber( $list_id, $data ),
+			'DELETE lists/{list_id}/unsubscribe',
+			[
+				'list_id' => $list_id,
+				'data'    => $data
+			]
+		);
 	}
 
 	/**
@@ -94,7 +129,18 @@ class EcomailApi {
 	public function bulk_add_subscribers( $list_id, array $data ) {
 		$this->initialize();
 
-		return $this->handle_response( $this->api->addSubscriberBulk( $list_id, $data ) );
+		$log_data                    = $data;
+		$log_data['subscriber_data'] = [ 'data'  => '... hidden ...',
+		                                 'count' => count( $data['subscriber_data'] ?? [] )
+		];
+
+		return $this->handle_response( $this->api->addSubscriberBulk( $list_id, $data ),
+			'POST lists/{list_id}/subscribe-bulk',
+			[
+				'list_id' => $list_id,
+				'data'    => $log_data
+			]
+		);
 	}
 
 	/**
@@ -107,7 +153,34 @@ class EcomailApi {
 	public function bulk_add_transactions( array $data ) {
 		$this->initialize();
 
-		return $this->handle_response( $this->api->createBulkTransactions( $data ) );
+		// Prepare log data with hidden transaction details
+		$log_data                     = $data;
+		$log_data['transaction_data'] = [ 'data'  => '... hidden ...',
+		                                  'count' => count( $data['transaction_data'] ?? [] )
+		];
+
+		return $this->handle_response( $this->api->createBulkTransactions( $data ),
+			'POST tracker/transaction-bulk',
+			$log_data
+		);
+	}
+
+	/**
+	 * Bulk Add Transactions
+	 *
+	 * @param array $data
+	 *
+	 * @return WP_Error
+	 */
+	public function bulk_get_transactions( array $data ) {
+		$this->initialize();
+
+		$data['shop'] = site_url();
+
+		return $this->handle_response( $this->api->getTransactions( $data ),
+			'GET tracker/transactions',
+			$data
+		);
 	}
 
 	/**
@@ -120,7 +193,10 @@ class EcomailApi {
 	public function add_transaction( array $data ) {
 		$this->initialize();
 
-		return $this->handle_response( $this->api->createNewTransaction( $data ) );
+		return $this->handle_response( $this->api->createNewTransaction( $data ),
+			'POST tracker/transaction',
+			$data
+		);
 	}
 
 	/**
@@ -131,10 +207,17 @@ class EcomailApi {
 	 *
 	 * @return WP_Error
 	 */
-	public function update_transaction( int $order_id, array $data ) {
+	public function update_transaction( int $order_id, array $data, bool $silent = false ) {
 		$this->initialize();
 
-		return $this->handle_response( $this->api->updateTransaction( $order_id, $data ) );
+		return $this->handle_response( $this->api->updateTransaction( $order_id, $data ),
+			'PUT tracker/transaction/{order_id}',
+			[
+				'order_id' => $order_id,
+				'data'     => $data
+			],
+			$silent
+		);
 	}
 
 	/**
@@ -164,7 +247,16 @@ class EcomailApi {
 			'value'    => json_encode( $value ),
 		);
 
-		return $this->handle_response( $this->api->addEvent( array( 'event' => $data ) ) );
+		return $this->handle_response( $this->api->addEvent( array( 'event' => $data ) ),
+			'POST tracker/events',
+			array(
+				'email'    => $email,
+				'category' => 'ue',
+				'action'   => 'Basket',
+				'label'    => 'Basket',
+				'value'    => '{ ... hidden data ... }',
+			)
+		);
 	}
 
 	/**
@@ -201,9 +293,19 @@ class EcomailApi {
 	 *
 	 * @return WP_Error
 	 */
-	public function handle_response( $response ) {
+	public function handle_response( $response, $endpoint = null, $request_args = [], $silent = false ) {
+		$message = sprintf( 'API: %s', $endpoint ?: 'error' );;
+
 		if ( ! empty( $response['error'] ) ) {
+			if ( ! $silent ) {
+				$this->log->error( $message, [ 'request' => $request_args, 'response' => $response ] );
+			}
+
 			return new WP_Error( $response['error'], sprintf( 'Error code %s', $response['error'] ) );
+		}
+
+		if ( ! empty( $endpoint ) && ! $silent ) {
+			$this->log->info( $message, [ 'request' => $request_args, 'response' => 'OK' ] );
 		}
 
 		return $response;

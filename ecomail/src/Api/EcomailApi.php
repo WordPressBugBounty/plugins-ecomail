@@ -60,6 +60,17 @@ class EcomailApi extends WP_REST_Controller {
 				),
 			)
 		);
+		register_rest_route(
+			ApiManager::REST_NAMESPACE,
+			'webhook',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'handle_webhook' ),
+					'permission_callback' => '__return_true',
+				),
+			)
+		);
 	}
 
 	/**
@@ -136,4 +147,59 @@ class EcomailApi extends WP_REST_Controller {
 	public function prepare_item_for_response( $item, $request ) {
 		return array();
 	}
+
+
+
+	/**
+	 * Handle webhook request.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function handle_webhook( $request ) {
+		// Get the webhook payload
+		$payload = $request->get_param( 'payload' );
+
+		if ( ! $payload || ! isset( $payload['email'] ) || ! isset( $payload['status'] ) ) {
+			return new WP_REST_Response(
+				array(
+					'status' => 'error',
+					'message' => 'Invalid payload - missing email or status'
+				),
+				400
+			);
+		}
+
+		$email = $payload['email'];
+		$status = $payload['status'];
+
+		// Find user by email
+		$user = get_user_by( 'email', $email );
+
+		if ( ! $user ) {
+			return new WP_REST_Response(
+				array(
+					'status' => 'error',
+					'message' => 'User not found'
+				),
+				404
+			);
+		}
+
+		// Update user meta with the subscription status
+		update_user_meta( $user->ID, '_ecomail_subscribe', $status );
+
+		return new WP_REST_Response(
+			array(
+				'status' => 'success',
+				'message' => 'Subscription status updated',
+				'user_id' => $user->ID,
+				'email' => $email,
+				'subscription_status' => $status
+			),
+			200
+		);
+	}
+
 }

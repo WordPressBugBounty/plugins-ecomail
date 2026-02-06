@@ -154,7 +154,7 @@ class AnnotationBasedAutowiring implements DefinitionSource, Autowiring
         if (!($annotation || $method->isConstructor())) {
             return null;
         }
-        $annotationParameters = ($annotation instanceof Inject) ? $annotation->getParameters() : [];
+        $annotationParameters = $annotation instanceof Inject ? $annotation->getParameters() : [];
         $parameters = [];
         foreach ($method->getParameters() as $index => $parameter) {
             $entryName = $this->getMethodParameter($index, $parameter, $annotationParameters);

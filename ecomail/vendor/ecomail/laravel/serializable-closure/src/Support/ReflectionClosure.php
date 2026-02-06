@@ -81,13 +81,13 @@ class ReflectionClosure extends ReflectionFunction
         $builtin_types = self::getBuiltinTypes();
         $class_keywords = ['self', 'static', 'parent'];
         $ns = $this->getClosureNamespaceName();
-        $nsf = ($ns == '') ? '' : (($ns[0] == '\\') ? $ns : ('\\' . $ns));
+        $nsf = $ns == '' ? '' : ($ns[0] == '\\' ? $ns : '\\' . $ns);
         $_file = var_export($fileName, \true);
         $_dir = var_export(dirname($fileName), \true);
         $_namespace = var_export($ns, \true);
         $_class = var_export(trim($className ?: '', '\\'), \true);
-        $_function = $ns . (($ns == '') ? '' : '\\') . '{closure}';
-        $_method = (($className == '') ? '' : (trim($className, '\\') . '::')) . $_function;
+        $_function = $ns . ($ns == '' ? '' : '\\') . '{closure}';
+        $_method = ($className == '' ? '' : trim($className, '\\') . '::') . $_function;
         $_function = var_export($_function, \true);
         $_method = var_export($_method, \true);
         $_trait = null;
@@ -111,7 +111,7 @@ class ReflectionClosure extends ReflectionFunction
                 case 'start':
                     if ($token[0] === \T_FUNCTION || $token[0] === \T_STATIC) {
                         $code .= $token[1];
-                        $state = ($token[0] === \T_FUNCTION) ? 'function' : 'static';
+                        $state = $token[0] === \T_FUNCTION ? 'function' : 'static';
                     } elseif ($token[0] === \T_FN) {
                         $isShortClosure = \true;
                         $code .= $token[1];
@@ -157,7 +157,7 @@ class ReflectionClosure extends ReflectionFunction
                 case 'named_function':
                     if ($token[0] === \T_FUNCTION || $token[0] === \T_STATIC) {
                         $code = $token[1];
-                        $state = ($token[0] === \T_FUNCTION) ? 'function' : 'static';
+                        $state = $token[0] === \T_FUNCTION ? 'function' : 'static';
                     } elseif ($token[0] === \T_FN) {
                         $isShortClosure = \true;
                         $code .= $token[1];
@@ -400,7 +400,7 @@ class ReflectionClosure extends ReflectionFunction
                                 $_trait = '';
                                 foreach ($structures as &$struct) {
                                     if ($struct['type'] === 'trait' && $struct['start'] <= $startLine && $struct['end'] >= $endLine) {
-                                        $_trait = (($ns == '') ? '' : ($ns . '\\')) . $struct['name'];
+                                        $_trait = ($ns == '' ? '' : $ns . '\\') . $struct['name'];
                                         break;
                                     }
                                 }
@@ -552,7 +552,7 @@ class ReflectionClosure extends ReflectionFunction
                                 }
                             }
                             $code .= $id_start . $id_name . $token[1];
-                            $state = ($token[0] === \T_DOUBLE_COLON) ? 'ignore_next' : $lastState;
+                            $state = $token[0] === \T_DOUBLE_COLON ? 'ignore_next' : $lastState;
                             break;
                         default:
                             if ($id_start !== '\\' && !defined($id_start)) {
@@ -885,7 +885,7 @@ class ReflectionClosure extends ReflectionFunction
                         case \T_TRAIT:
                             $state = 'before_structure';
                             $startLine = $token[2];
-                            $structType = ($token[0] == \T_CLASS) ? 'class' : (($token[0] == \T_INTERFACE) ? 'interface' : 'trait');
+                            $structType = $token[0] == \T_CLASS ? 'class' : ($token[0] == \T_INTERFACE ? 'interface' : 'trait');
                             break;
                         case \T_USE:
                             $state = 'use';
@@ -949,7 +949,7 @@ class ReflectionClosure extends ReflectionFunction
                                 }
                             }
                             $name = $alias = '';
-                            $state = ($token === ';') ? 'start' : 'use';
+                            $state = $token === ';' ? 'start' : 'use';
                             break;
                     }
                     break;
@@ -986,7 +986,7 @@ class ReflectionClosure extends ReflectionFunction
                                 }
                             }
                             $name = $alias = '';
-                            $state = ($token === '}') ? 'use' : 'use-group';
+                            $state = $token === '}' ? 'use' : 'use-group';
                             break;
                     }
                     break;

@@ -2,6 +2,7 @@
 
 namespace Ecomail;
 
+use Ecomail\Managers\ApiManager;
 use EcomailDeps\Wpify\CustomFields\CustomFields;
 
 /**
@@ -47,31 +48,34 @@ class Settings {
 		$settings   = get_option( self::KEY );
 		$additional = array();
 
+		$api_manager = ecomail_container()->get( ApiManager::class );
+		$webhook_url = $api_manager->get_rest_url() . '/webhook';
+
 		if ( is_array( $settings ) && ! empty( $settings['api_key'] ) && ! empty( $settings['app_id'] ) ) {
 			$additional = array(
 				array(
 					'id'          => 'enable_tracking_code',
 					'type'        => 'toggle',
-					'title'       => __( 'Add tracking code to website', 'ecomail-woocommerce' ),
-					'description' => __( 'Check to add tracking code to the website', 'ecomail-woocommerce' ),
+					'title'       => __( 'Add tracking code to website', 'ecomail' ),
+					'description' => __( 'Check to add tracking code to the website', 'ecomail' ),
 				),
 				array(
 					'id'          => 'enable_manual_tracking',
 					'type'        => 'toggle',
-					'title'       => __( 'Enable manual tracking', 'ecomail-woocommerce' ),
-					'description' => __( 'Check if you want to identify the user by WP login details. The priorities are - Ecomail email, Customer email, WP User email', 'ecomail-woocommerce' ),
+					'title'       => __( 'Enable manual tracking', 'ecomail' ),
+					'description' => __( 'Check if you want to identify the user by WP login details. The priorities are - Ecomail email, Customer email, WP User email', 'ecomail' ),
 				),
 				array(
 					'id'          => 'woocommerce_checkout_subscribe',
 					'type'        => 'toggle',
-					'title'       => __( 'Subscribe on checkout', 'ecomail-woocommerce' ),
-					'description' => __( 'Check to enable Ecomail subscriptions on checkout', 'ecomail-woocommerce' ),
+					'title'       => __( 'Subscribe on checkout', 'ecomail' ),
+					'description' => __( 'Check to enable Ecomail subscriptions on checkout', 'ecomail' ),
 				),
 				array(
 					'id'          => 'woocommerce_checkout_subscribe_checkbox',
 					'type'        => 'toggle',
-					'title'       => __( 'Show checkbox on checkout', 'ecomail-woocommerce' ),
-					'description' => __( 'Check to display "I dont\'n like to receive newsletters" checkbox on checkout', 'ecomail-woocommerce' ),
+					'title'       => __( 'Show checkbox on checkout', 'ecomail' ),
+					'description' => __( 'Check to display "I dont\'n like to receive newsletters" checkbox on checkout', 'ecomail' ),
 					'conditions'  => array(
 						array( 'field' => 'woocommerce_checkout_subscribe', 'value' => true ),
 					),
@@ -79,9 +83,9 @@ class Settings {
 				array(
 					'id'          => 'woocommerce_checkout_not_subscribe_text',
 					'type'        => 'text',
-					'title'       => __( 'Text for Not subscribe on checkout checkbox', 'ecomail-woocommerce' ),
-					'description' => __( 'Enter the text that will appear on checkout to disable subscription', 'ecomail-woocommerce' ),
-					'default'     => __( 'I don\'t like to receive newsletters', 'ecomail-woocommerce' ),
+					'title'       => __( 'Text for Not subscribe on checkout checkbox', 'ecomail' ),
+					'description' => __( 'Enter the text that will appear on checkout to disable subscription', 'ecomail' ),
+					'default'     => __( 'I don\'t like to receive newsletters', 'ecomail' ),
 					'conditions'  => array(
 						array( 'field' => 'woocommerce_checkout_subscribe', 'value' => true ),
 					),
@@ -89,8 +93,8 @@ class Settings {
 				array(
 					'id'          => 'woocommerce_checkout_update',
 					'type'        => 'toggle',
-					'title'       => __( 'Update subscriber data in Ecomail', 'ecomail-woocommerce' ),
-					'description' => __( 'Check if you want to update existing contacts in Ecomail with the details entered on checkout', 'ecomail-woocommerce' ),
+					'title'       => __( 'Update subscriber data in Ecomail', 'ecomail' ),
+					'description' => __( 'Check if you want to update existing contacts in Ecomail with the details entered on checkout', 'ecomail' ),
 					'conditions'  => array(
 						array( 'field' => 'woocommerce_checkout_subscribe', 'value' => true ),
 					),
@@ -98,8 +102,8 @@ class Settings {
 				array(
 					'id'          => 'woocommerce_checkout_resubscribe',
 					'type'        => 'toggle',
-					'title'       => __( 'Resubscribe subscriber with new order', 'ecomail-woocommerce' ),
-					'description' => __( 'If a contact unsubscribe and places a new order - the option to subscribe them back.', 'ecomail-woocommerce' ),
+					'title'       => __( 'Resubscribe subscriber with new order', 'ecomail' ),
+					'description' => __( 'If a contact unsubscribe and places a new order - the option to subscribe them back.', 'ecomail' ),
 					'conditions'  => array(
 						array( 'field' => 'woocommerce_checkout_subscribe', 'value' => true ),
 					),
@@ -107,10 +111,10 @@ class Settings {
 				array(
 					'id'          => 'woocommerce_checkout_list_id',
 					'type'        => 'select',
-					'title'       => __( 'List for checkout subscriptions', 'ecomail-woocommerce' ),
+					'title'       => __( 'List for checkout subscriptions', 'ecomail' ),
 					'description' => sprintf(
 					/* Translators: %s URL */
-						__( 'Select the list that you want to subscribe the customers on checkout. Click <a href="%s">here</a> to refresh the lists', 'ecomail-woocommerce' ),
+						__( 'Select the list that you want to subscribe the customers on checkout. Click <a href="%s">here</a> to refresh the lists', 'ecomail' ),
 						add_query_arg( array( 'action' => 'ecomail_refresh_lists' ), admin_url() )
 					),
 					'conditions'  => array(
@@ -121,8 +125,8 @@ class Settings {
 				array(
 					'id'          => 'woocommerce_checkout_skip_confirmation',
 					'type'        => 'toggle',
-					'title'       => __( 'Skip confirmation', 'ecomail-woocommerce' ),
-					'description' => __( 'Check to skip double opt-in', 'ecomail-woocommerce' ),
+					'title'       => __( 'Skip confirmation', 'ecomail' ),
+					'description' => __( 'Check to skip double opt-in', 'ecomail' ),
 					'conditions'  => array(
 						array( 'field' => 'woocommerce_checkout_subscribe', 'value' => true ),
 					),
@@ -130,8 +134,8 @@ class Settings {
 				array(
 					'id'          => 'woocommerce_checkout_trigger_autoresponders',
 					'type'        => 'toggle',
-					'title'       => __( 'Trigger autoresponders', 'ecomail-woocommerce' ),
-					'description' => __( 'Check to trigger Ecomail autoresponders when the user is added to the list', 'ecomail-woocommerce' ),
+					'title'       => __( 'Trigger autoresponders', 'ecomail' ),
+					'description' => __( 'Check to trigger Ecomail autoresponders when the user is added to the list', 'ecomail' ),
 					'conditions'  => array(
 						array( 'field' => 'woocommerce_checkout_subscribe', 'value' => true ),
 					),
@@ -139,43 +143,43 @@ class Settings {
 				array(
 					'id'          => 'woocommerce_checkout_subscribe_fields',
 					'type'        => 'multi_select',
-					'title'       => __( 'Fields to register on checkout', 'ecomail-woocommerce' ),
-					'description' => __( 'Select fields that you want to send to Ecomail on checkout subscription', 'ecomail-woocommerce' ),
+					'title'       => __( 'Fields to register on checkout', 'ecomail' ),
+					'description' => __( 'Select fields that you want to send to Ecomail on checkout subscription', 'ecomail' ),
 					'conditions'  => array(
 						array( 'field' => 'woocommerce_checkout_subscribe', 'value' => true ),
 					),
 					'multi'       => true,
 					'options'     => array(
 						array(
-							'label' => __( 'First name', 'ecomail-woocommerce' ),
+							'label' => __( 'First name', 'ecomail' ),
 							'value' => 'first_name',
 						),
 						array(
-							'label' => __( 'Last name', 'ecomail-woocommerce' ),
+							'label' => __( 'Last name', 'ecomail' ),
 							'value' => 'last_name',
 						),
 						array(
-							'label' => __( 'Street', 'ecomail-woocommerce' ),
+							'label' => __( 'Street', 'ecomail' ),
 							'value' => 'street',
 						),
 						array(
-							'label' => __( 'City', 'ecomail-woocommerce' ),
+							'label' => __( 'City', 'ecomail' ),
 							'value' => 'city',
 						),
 						array(
-							'label' => __( 'Postcode', 'ecomail-woocommerce' ),
+							'label' => __( 'Postcode', 'ecomail' ),
 							'value' => 'postcode',
 						),
 						array(
-							'label' => __( 'Country', 'ecomail-woocommerce' ),
+							'label' => __( 'Country', 'ecomail' ),
 							'value' => 'country',
 						),
 						array(
-							'label' => __( 'Company', 'ecomail-woocommerce' ),
+							'label' => __( 'Company', 'ecomail' ),
 							'value' => 'company',
 						),
 						array(
-							'label' => __( 'Phone', 'ecomail-woocommerce' ),
+							'label' => __( 'Phone', 'ecomail' ),
 							'value' => 'phone',
 						),
 					),
@@ -183,35 +187,35 @@ class Settings {
 				array(
 					'id'          => 'api_source',
 					'type'        => 'text',
-					'title'       => __( 'API Source', 'ecomail-woocommerce' ),
-					'description' => __( 'Enter the contact source that you want to add to Ecomail.', 'ecomail-woocommerce' ),
+					'title'       => __( 'API Source', 'ecomail' ),
+					'description' => __( 'Enter the contact source that you want to add to Ecomail.', 'ecomail' ),
 				),
 				array(
 					'id'          => 'woocommerce_order_tracking',
 					'type'        => 'toggle',
-					'title'       => __( 'Enable order tracking', 'ecomail-woocommerce' ),
-					'description' => __( 'Check if you want to send order data to Ecomail. Only for Marketer+ plan.', 'ecomail-woocommerce' ),
+					'title'       => __( 'Enable order tracking', 'ecomail' ),
+					'description' => __( 'Check if you want to send order data to Ecomail. Only for Marketer+ plan.', 'ecomail' ),
 				),
 				array(
 					'id'          => 'woocommerce_cart_tracking',
 					'type'        => 'toggle',
-					'title'       => __( 'Enable cart tracking', 'ecomail-woocommerce' ),
-					'description' => __( 'Check if you want to send customer carts to Ecomail. This data can be used for abandoned cart automation in Ecomail. Only for Marketer+ plan.', 'ecomail-woocommerce' ),
+					'title'       => __( 'Enable cart tracking', 'ecomail' ),
+					'description' => __( 'Check if you want to send customer carts to Ecomail. This data can be used for abandoned cart automation in Ecomail. Only for Marketer+ plan.', 'ecomail' ),
 				),
 				array(
 					'id'          => 'woocommerce_last_product_tracking',
 					'type'        => 'toggle',
-					'title'       => __( 'Enable Last view (product) tracking', 'ecomail-woocommerce' ),
-					'description' => __( 'Check if you want to send Last viewed product to Ecomail. This data can be used for automation in Ecomail (ECM_LAST_VIEW merge tag). Only for Marketer+ plan.', 'ecomail-woocommerce' ),
+					'title'       => __( 'Enable Last view (product) tracking', 'ecomail' ),
+					'description' => __( 'Check if you want to send Last viewed product to Ecomail. This data can be used for automation in Ecomail (ECM_LAST_VIEW merge tag). Only for Marketer+ plan.', 'ecomail' ),
 				),
 				array(
 					'id'          => 'bulk_upload_existing_customers',
 					'type'        => 'button',
 					'url'         => add_query_arg( array( 'action' => 'ecomail_bulk_upload_users' ), admin_url() ),
-					'title'       => __( 'Bulk upload existing customers', 'ecomail-woocommerce' ),
+					'title'       => __( 'Bulk upload existing customers', 'ecomail' ),
 					'description' => __(
 						'<strong>The settings above will be used (List ID, fields), please make sure to save the settings first before clicking on the Bulk upload button.</strong> The users will be uploaded in background, in batches of 500.',
-						'ecomail-woocommerce'
+						'ecomail'
 					),
 					'target'      => '_self',
 				),
@@ -219,38 +223,54 @@ class Settings {
 					'id'          => 'bulk_upload_existing_customers_and_orders',
 					'type'        => 'button',
 					'url'         => add_query_arg( array( 'action' => 'ecomail_bulk_upload_users_and_orders' ), admin_url() ),
-					'title'       => __( 'Bulk upload existing customers and their orders', 'ecomail-woocommerce' ),
+					'title'       => __( 'Bulk upload existing customers and their orders', 'ecomail' ),
 					'description' => __(
 						'<strong>The settings above will be used (List ID, fields), please make sure to save the settings first before clicking on the Bulk upload button.</strong> The users and orders will be uploaded in background, in batches of 500.',
-						'ecomail-woocommerce'
+						'ecomail'
+					),
+					'target'      => '_self',
+				),
+				array(
+					'id'          => 'bulk_update_existing_orders',
+					'type'        => 'button',
+					'url'         => add_query_arg( array( 'action' => 'ecomail_bulk_update_orders' ), admin_url() ),
+					'title'       => __( 'Bulk update existing orders', 'ecomail' ),
+					'description' => __(
+						'<strong>The settings above will be used (List ID, fields), please make sure to save the settings first before clicking on the Bulk upload button.</strong> The orders will be updated in background, in batches of 200.',
+						'ecomail'
 					),
 					'target'      => '_self',
 				),
 				array(
 					'type'  => 'title',
-					'label' => __( 'Marketing cookie', 'ecomail-woocommerce' ),
-					'desc'  => __( 'You need consent from the visitor for marketing cookies. If you don`t enter the name and value of the marketing cookie the data will be sent as if consent had been given.', 'ecomail-woocommerce' ),
+					'title' => __( 'Marketing cookie', 'ecomail' ),
+					'desc'  => __( 'You need consent from the visitor for marketing cookies. If you don`t enter the name and value of the marketing cookie the data will be sent as if consent had been given.', 'ecomail' ),
 				),
 				array(
 					'id'    => 'cookie_name',
 					'type'  => 'text',
-					'label' => __( 'Marketing cookie name', 'ecomail-woocommerce' ),
-					'desc'  => __( 'Enter the name of the cookie that represents the agreed marketing cookies. For example, in the case of using the "Complianz" plugin, this is <code>cmplz_marketing</code>.', 'ecomail-woocommerce' ),
+					'label' => __( 'Marketing cookie name', 'ecomail' ),
+					'desc'  => __( 'Enter the name of the cookie that represents the agreed marketing cookies. For example, in the case of using the "Complianz" plugin, this is <code>cmplz_marketing</code>.', 'ecomail' ),
 				),
 				array(
 					'id'    => 'cookie_value',
 					'type'  => 'text',
-					'label' => __( 'Marketing cookie value', 'ecomail-woocommerce' ),
-					'desc'  => __( 'Enter the value of the cookie that represents the agreed marketing cookies. For example, in the case of using the "Complianz" plugin, this is <code>allow</code>.', 'ecomail-woocommerce' ),
+					'label' => __( 'Marketing cookie value', 'ecomail' ),
+					'desc'  => __( 'Enter the value of the cookie that represents the agreed marketing cookies. For example, in the case of using the "Complianz" plugin, this is <code>allow</code>.', 'ecomail' ),
 				),
-
+				array(
+					'type'  => 'title',
+					'title' => __( 'Webhook', 'ecomail' ),
+					'desc'  => sprintf(__( 'If you want to continuously update information about newsletter subscriptions for users, set up a webhook for the relevant mailing list at the following URL: <code>%s</code>.', 'ecomail' ),
+						$webhook_url),
+				),
 			);
 		}
 
 		return array(
 			'parent_slug' => 'options-general.php',
-			'page_title'  => __( 'Ecomail Settings', 'ecomail-woocommerce' ),
-			'menu_title'  => __( 'Ecomail', 'ecomail-woocommerce' ),
+			'page_title'  => __( 'Ecomail Settings', 'ecomail' ),
+			'menu_title'  => __( 'Ecomail', 'ecomail' ),
 			'menu_slug'   => self::KEY,
 			'capability'  => 'manage_options',
 			'option_name' => self::KEY,
@@ -259,14 +279,14 @@ class Settings {
 					array(
 						'id'          => 'api_key',
 						'type'        => 'text',
-						'title'       => __( 'API key', 'ecomail-woocommerce' ),
-						'description' => __( 'Enter API key', 'ecomail-woocommerce' ),
+						'title'       => __( 'API key', 'ecomail' ),
+						'description' => __( 'Enter API key', 'ecomail' ),
 					),
 					array(
 						'id'          => 'app_id',
 						'type'        => 'text',
-						'title'       => __( 'App ID', 'ecomail-woocommerce' ),
-						'description' => __( 'Enter App ID - this is first part of your Ecomail account URL.', 'ecomail-woocommerce' ),
+						'title'       => __( 'App ID', 'ecomail' ),
+						'description' => __( 'Enter App ID - this is first part of your Ecomail account URL.', 'ecomail' ),
 					),
 				),
 				$additional,

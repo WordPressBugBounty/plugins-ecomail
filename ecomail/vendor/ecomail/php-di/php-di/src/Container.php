@@ -203,7 +203,7 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
         $className = get_class($instance);
         // If the class is anonymous, don't cache its definition
         // Checking for anonymous classes is cleaner via Reflection, but also slower
-        $objectDefinition = (\false !== strpos($className, '@anonymous')) ? $this->definitionSource->getDefinition($className) : $this->getDefinition($className);
+        $objectDefinition = \false !== strpos($className, '@anonymous') ? $this->definitionSource->getDefinition($className) : $this->getDefinition($className);
         if (!$objectDefinition instanceof ObjectDefinition) {
             return $instance;
         }
@@ -296,7 +296,7 @@ class Container implements ContainerInterface, FactoryInterface, InvokerInterfac
             return sprintf('Value (\'%s\')', $entry);
         }
         if (is_bool($entry)) {
-            return sprintf('Value (%s)', ($entry === \true) ? 'true' : 'false');
+            return sprintf('Value (%s)', $entry === \true ? 'true' : 'false');
         }
         return sprintf('Value (%s)', is_scalar($entry) ? $entry : ucfirst(gettype($entry)));
     }

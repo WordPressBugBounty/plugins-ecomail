@@ -161,7 +161,7 @@ class PhpDocReader
      */
     private function tryResolveFqn(string $type, ReflectionClass $class, Reflector $member): ?string
     {
-        $alias = (($pos = strpos($type, '\\')) === \false) ? $type : substr($type, 0, $pos);
+        $alias = ($pos = strpos($type, '\\')) === \false ? $type : substr($type, 0, $pos);
         $loweredAlias = strtolower($alias);
         // Retrieve "use" statements
         $uses = $this->parser->parseUseStatements($class);

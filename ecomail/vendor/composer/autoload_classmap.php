@@ -9,6 +9,7 @@ return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'Ecomail\\Admin' => $baseDir . '/src/Admin.php',
     'Ecomail\\Api\\EcomailApi' => $baseDir . '/src/Api/EcomailApi.php',
+    'Ecomail\\BlockSupport' => $baseDir . '/src/BlockSupport.php',
     'Ecomail\\Ecomail' => $baseDir . '/src/Ecomail.php',
     'Ecomail\\EcomailApi' => $baseDir . '/src/EcomailApi.php',
     'Ecomail\\Frontend' => $baseDir . '/src/Frontend.php',

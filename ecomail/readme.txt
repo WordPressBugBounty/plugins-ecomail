@@ -5,7 +5,7 @@ Tags: email, marketing, newsletter, ecomail, woocommerce, emailing
 Requires at least: 6.5
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 2.3.2
+Stable tag: 2.4.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,6 +24,10 @@ Official plugin to connect your WooCommerce platform with Ecomail.cz application
 * Add a tracking code for behaviour tracking on your site (only for Marketer+ accounts)
 * Abandoned cart tracking for automations in Ecomail application (only for Marketer+ accounts)
 
+### Support
+
+If you have any questions, contact us at support@ecomail.cz or via chat directly in the application.
+
 == Installation ==
 
 1. Upload the plugin files to the `/wp-content/plugins/ecomail` directory, or install the plugin through the WordPress plugins screen directly.
@@ -38,6 +42,25 @@ Official plugin to connect your WooCommerce platform with Ecomail.cz application
 == Screenshots ==
 
 == Changelog ==
+= 2.4.2 =
+* Change transaction item price from unit price to total price
+* Change category parameter to categories array (supports multiple categories per product)
+* Fix transaction amount to total including tax
+
+= 2.4.1 =
+* Fix double opt-in after Woo order
+* Fix adding wp_newsletter tag from the account subscription
+* Fix textdomain
+* Add better email validation check
+
+= 2.4.0 =
+* Add bulk update existing orders functionality
+* Add subscription preference tracking for orders and users
+* Add info about subscription into Customer account"
+* Add toggle button to subscribe/unsubscribe into Customer accoun
+* Add webhooks to update subscription info
+* Add process logging using WooCommerce logger
+* Fix bulk import existing orders
 
 = 2.3.2 =
 * Fix set tags to not overwrite existing

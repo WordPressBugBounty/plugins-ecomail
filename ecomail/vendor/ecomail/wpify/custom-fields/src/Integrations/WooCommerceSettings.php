@@ -179,7 +179,7 @@ class WooCommerceSettings extends OptionsIntegration
                     echo esc_url($url);
                     ?>"
 								class="<?php 
-                    echo ($current_section === $id) ? 'current' : '';
+                    echo $current_section === $id ? 'current' : '';
                     ?>"
 							>
 								<?php 
@@ -187,7 +187,7 @@ class WooCommerceSettings extends OptionsIntegration
                     ?>
 							</a>
 							<?php 
-                    echo (end($array_keys) === $id) ? '' : '|';
+                    echo end($array_keys) === $id ? '' : '|';
                     ?>
 						</li>
 						<?php 

@@ -432,6 +432,30 @@ class Ecomail
         $url = $this->joinString('tracker/transaction/', $transaction_id, '/delete');
         return $this->delete($url);
     }
+    /**
+     * Delete multiple transactions
+     *
+     * @param array $data Data
+     * @return array|stdClass|string
+     */
+    public function deleteBulkTransactions(array $data)
+    {
+        $url = $this->joinString('tracker/transaction/delete-bulk');
+        return $this->delete($url, $data);
+    }
+    /**
+     * @param array $queryParams Optional query parameters
+     * @return array|stdClass|string
+     */
+    public function getTransactions(array $queryParams = array())
+    {
+        $url = $this->joinString('tracker/transaction');
+        $query = array();
+        if (!empty($queryParams)) {
+            $query = $queryParams;
+        }
+        return $this->get($url, $query);
+    }
     // === Feeds ===
     /**
      * Refresh a product feed by its ID.
@@ -583,7 +607,7 @@ class Ecomail
         if (!\is_null($method)) {
             \curl_setopt($ch, \CURLOPT_CUSTOMREQUEST, \strtoupper($method));
         }
-        $json_options = 0 | ((\PHP_VERSION_ID >= 70300) ? \JSON_THROW_ON_ERROR : 0);
+        $json_options = 0 | (\PHP_VERSION_ID >= 70300 ? \JSON_THROW_ON_ERROR : 0);
         if (\is_array($data)) {
             \curl_setopt($ch, \CURLOPT_POSTFIELDS, \json_encode($data, $json_options));
         }

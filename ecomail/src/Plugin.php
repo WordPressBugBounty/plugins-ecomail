@@ -13,7 +13,8 @@ final class Plugin {
 		RepositoriesManager $repositories_manager,
 		Frontend $frontend,
 		Settings $settings,
-		Admin $admin
+		Admin $admin,
+		BlockSupport $block_support
 	) {
 	}
 

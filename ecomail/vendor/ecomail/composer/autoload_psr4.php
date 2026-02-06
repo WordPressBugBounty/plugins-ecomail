@@ -8,8 +8,10 @@ $baseDir = dirname($vendorDir);
 return array(
     'EcomailDeps\\Wpify\\PluginUtils\\' => array($vendorDir . '/wpify/plugin-utils/src'),
     'EcomailDeps\\Wpify\\Model\\' => array($vendorDir . '/wpify/model/src'),
+    'EcomailDeps\\Wpify\\Log\\' => array($vendorDir . '/wpify/log/src'),
     'EcomailDeps\\Wpify\\CustomFields\\' => array($vendorDir . '/wpify/custom-fields/src'),
     'EcomailDeps\\Wpify\\Asset\\' => array($vendorDir . '/wpify/asset/src'),
+    'EcomailDeps\\Psr\\Log\\' => array($vendorDir . '/psr/log/src'),
     'EcomailDeps\\Psr\\Container\\' => array($vendorDir . '/psr/container/src'),
     'EcomailDeps\\PhpDocReader\\' => array($vendorDir . '/php-di/phpdoc-reader/src/PhpDocReader'),
     'EcomailDeps\\Laravel\\SerializableClosure\\' => array($vendorDir . '/laravel/serializable-closure/src'),

@@ -57,7 +57,7 @@ class ObjectDefinitionDumper
         $str = '';
         foreach ($definition->getPropertyInjections() as $propertyInjection) {
             $value = $propertyInjection->getValue();
-            $valueStr = ($value instanceof Definition) ? (string) $value : var_export($value, \true);
+            $valueStr = $value instanceof Definition ? (string) $value : var_export($value, \true);
             $str .= sprintf(\PHP_EOL . '    $%s = %s', $propertyInjection->getPropertyName(), $valueStr);
         }
         return $str;
@@ -79,7 +79,7 @@ class ObjectDefinitionDumper
         foreach ($methodReflection->getParameters() as $index => $parameter) {
             if (array_key_exists($index, $definitionParameters)) {
                 $value = $definitionParameters[$index];
-                $valueStr = ($value instanceof Definition) ? (string) $value : var_export($value, \true);
+                $valueStr = $value instanceof Definition ? (string) $value : var_export($value, \true);
                 $args[] = sprintf('$%s = %s', $parameter->getName(), $valueStr);
                 continue;
             }

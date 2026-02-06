@@ -42,6 +42,6 @@ class CallableReflection
         if (is_string($callable) && function_exists($callable)) {
             return new ReflectionFunction($callable);
         }
-        throw new NotCallableException(sprintf('%s is not a callable', is_string($callable) ? $callable : ('Instance of ' . get_class($callable))));
+        throw new NotCallableException(sprintf('%s is not a callable', is_string($callable) ? $callable : 'Instance of ' . get_class($callable)));
     }
 }

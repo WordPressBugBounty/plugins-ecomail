@@ -24,6 +24,7 @@ class ComposerStaticInit946afb2029560bbb392c5f417bd560a8
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'Ecomail\\Admin' => __DIR__ . '/../..' . '/src/Admin.php',
         'Ecomail\\Api\\EcomailApi' => __DIR__ . '/../..' . '/src/Api/EcomailApi.php',
+        'Ecomail\\BlockSupport' => __DIR__ . '/../..' . '/src/BlockSupport.php',
         'Ecomail\\Ecomail' => __DIR__ . '/../..' . '/src/Ecomail.php',
         'Ecomail\\EcomailApi' => __DIR__ . '/../..' . '/src/EcomailApi.php',
         'Ecomail\\Frontend' => __DIR__ . '/../..' . '/src/Frontend.php',

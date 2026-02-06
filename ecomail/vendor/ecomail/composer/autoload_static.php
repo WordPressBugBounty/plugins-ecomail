@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit95a1c1e3a9ba30643b1503365f21ce96
+class ComposerStaticInit1d94a91e973a4f24117ec7188130c3b3
 {
     public static $files = array (
         'ecomaildepsb33e3d135e5d9e47d845c576147bda89' => __DIR__ . '/..' . '/php-di/php-di/src/functions.php',
@@ -16,8 +16,10 @@ class ComposerStaticInit95a1c1e3a9ba30643b1503365f21ce96
         array (
             'EcomailDeps\\Wpify\\PluginUtils\\' => 30,
             'EcomailDeps\\Wpify\\Model\\' => 24,
+            'EcomailDeps\\Wpify\\Log\\' => 22,
             'EcomailDeps\\Wpify\\CustomFields\\' => 31,
             'EcomailDeps\\Wpify\\Asset\\' => 24,
+            'EcomailDeps\\Psr\\Log\\' => 20,
             'EcomailDeps\\Psr\\Container\\' => 26,
             'EcomailDeps\\PhpDocReader\\' => 25,
             'EcomailDeps\\Laravel\\SerializableClosure\\' => 40,
@@ -35,6 +37,10 @@ class ComposerStaticInit95a1c1e3a9ba30643b1503365f21ce96
         array (
             0 => __DIR__ . '/..' . '/wpify/model/src',
         ),
+        'EcomailDeps\\Wpify\\Log\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wpify/log/src',
+        ),
         'EcomailDeps\\Wpify\\CustomFields\\' => 
         array (
             0 => __DIR__ . '/..' . '/wpify/custom-fields/src',
@@ -42,6 +48,10 @@ class ComposerStaticInit95a1c1e3a9ba30643b1503365f21ce96
         'EcomailDeps\\Wpify\\Asset\\' => 
         array (
             0 => __DIR__ . '/..' . '/wpify/asset/src',
+        ),
+        'EcomailDeps\\Psr\\Log\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/log/src',
         ),
         'EcomailDeps\\Psr\\Container\\' => 
         array (
@@ -162,6 +172,14 @@ class ComposerStaticInit95a1c1e3a9ba30643b1503365f21ce96
         'EcomailDeps\\Psr\\Container\\ContainerExceptionInterface' => __DIR__ . '/..' . '/psr/container/src/ContainerExceptionInterface.php',
         'EcomailDeps\\Psr\\Container\\ContainerInterface' => __DIR__ . '/..' . '/psr/container/src/ContainerInterface.php',
         'EcomailDeps\\Psr\\Container\\NotFoundExceptionInterface' => __DIR__ . '/..' . '/psr/container/src/NotFoundExceptionInterface.php',
+        'EcomailDeps\\Psr\\Log\\AbstractLogger' => __DIR__ . '/..' . '/psr/log/src/AbstractLogger.php',
+        'EcomailDeps\\Psr\\Log\\InvalidArgumentException' => __DIR__ . '/..' . '/psr/log/src/InvalidArgumentException.php',
+        'EcomailDeps\\Psr\\Log\\LogLevel' => __DIR__ . '/..' . '/psr/log/src/LogLevel.php',
+        'EcomailDeps\\Psr\\Log\\LoggerAwareInterface' => __DIR__ . '/..' . '/psr/log/src/LoggerAwareInterface.php',
+        'EcomailDeps\\Psr\\Log\\LoggerAwareTrait' => __DIR__ . '/..' . '/psr/log/src/LoggerAwareTrait.php',
+        'EcomailDeps\\Psr\\Log\\LoggerInterface' => __DIR__ . '/..' . '/psr/log/src/LoggerInterface.php',
+        'EcomailDeps\\Psr\\Log\\LoggerTrait' => __DIR__ . '/..' . '/psr/log/src/LoggerTrait.php',
+        'EcomailDeps\\Psr\\Log\\NullLogger' => __DIR__ . '/..' . '/psr/log/src/NullLogger.php',
         'EcomailDeps\\Wpify\\Asset\\Asset' => __DIR__ . '/..' . '/wpify/asset/src/Asset.php',
         'EcomailDeps\\Wpify\\Asset\\AssetConfig' => __DIR__ . '/..' . '/wpify/asset/src/AssetConfig.php',
         'EcomailDeps\\Wpify\\Asset\\AssetConfigInterface' => __DIR__ . '/..' . '/wpify/asset/src/AssetConfigInterface.php',
@@ -189,6 +207,10 @@ class ComposerStaticInit95a1c1e3a9ba30643b1503365f21ce96
         'EcomailDeps\\Wpify\\CustomFields\\Integrations\\User' => __DIR__ . '/..' . '/wpify/custom-fields/src/Integrations/User.php',
         'EcomailDeps\\Wpify\\CustomFields\\Integrations\\WcMembershipPlanOptions' => __DIR__ . '/..' . '/wpify/custom-fields/src/Integrations/WcMembershipPlanOptions.php',
         'EcomailDeps\\Wpify\\CustomFields\\Integrations\\WooCommerceSettings' => __DIR__ . '/..' . '/wpify/custom-fields/src/Integrations/WooCommerceSettings.php',
+        'EcomailDeps\\Wpify\\Log\\Log' => __DIR__ . '/..' . '/wpify/log/src/Log.php',
+        'EcomailDeps\\Wpify\\Log\\RotatingFileHandler' => __DIR__ . '/..' . '/wpify/log/src/RotatingFileHandler.php',
+        'EcomailDeps\\Wpify\\Log\\RotatingFileLog' => __DIR__ . '/..' . '/wpify/log/src/RotatingFileLog.php',
+        'EcomailDeps\\Wpify\\Log\\Tools' => __DIR__ . '/..' . '/wpify/log/src/Tools.php',
         'EcomailDeps\\Wpify\\Model\\Attachment' => __DIR__ . '/..' . '/wpify/model/src/Attachment.php',
         'EcomailDeps\\Wpify\\Model\\AttachmentRepository' => __DIR__ . '/..' . '/wpify/model/src/AttachmentRepository.php',
         'EcomailDeps\\Wpify\\Model\\Attributes\\AccessorObject' => __DIR__ . '/..' . '/wpify/model/src/Attributes/AccessorObject.php',
@@ -269,9 +291,9 @@ class ComposerStaticInit95a1c1e3a9ba30643b1503365f21ce96
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit95a1c1e3a9ba30643b1503365f21ce96::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit95a1c1e3a9ba30643b1503365f21ce96::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit95a1c1e3a9ba30643b1503365f21ce96::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit1d94a91e973a4f24117ec7188130c3b3::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit1d94a91e973a4f24117ec7188130c3b3::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit1d94a91e973a4f24117ec7188130c3b3::$classMap;
 
         }, null, ClassLoader::class);
     }

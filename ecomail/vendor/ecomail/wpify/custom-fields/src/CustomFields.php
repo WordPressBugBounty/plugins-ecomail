@@ -284,7 +284,7 @@ class CustomFields
         if (file_exists($asset_php)) {
             $asset = require $asset_php;
         }
-        $src = (!empty($asset)) ? add_query_arg('ver', $asset['version'], $this->get_build_url($item . '.css')) : $this->get_build_url($item . '.css');
+        $src = !empty($asset) ? add_query_arg('ver', $asset['version'], $this->get_build_url($item . '.css')) : $this->get_build_url($item . '.css');
         if (!empty($asset) && file_exists($this->get_build_path('style-' . $item . '.css'))) {
             $src = array($src, add_query_arg('ver', $asset['version'], $this->get_build_url('style-' . $item . '.css')));
         }

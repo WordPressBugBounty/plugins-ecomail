@@ -2,17 +2,17 @@
 /*
  * Plugin Name:          Ecomail
  * Description:          Official Ecomail integration for WordPress and WooCommerce
- * Version:              2.3.2
+ * Version:              2.4.2
  * Requires PHP:         8.1.0
  * Requires at least:    6.5
  * Author:               ECOMAIL.CZ
  * Author URI:           https://ecomail.cz/
  * License:              GPL v2 or later
  * License URI:          https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:          ecomail-woocommerce
+ * Text Domain:          ecomail
  * Domain Path:          /languages
  * WC requires at least: 4.5
- * WC tested up to:      9.8
+ * WC tested up to:      10.1
 */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -83,7 +83,7 @@ function ecomail_php_upgrade_notice() {
 			<?php
 			printf(
 			/* Translators: %1$s Plugin name, %2$s Plugin min. PHP version, %3$s server PHP version */
-				esc_html( __( 'Opps! %1$s requires a minimum PHP version of %2$s. Your current version is: %3$s. Please contact your host to upgrade.', 'ecomail-woocommerce' ) ),
+				esc_html( __( 'Opps! %1$s requires a minimum PHP version of %2$s. Your current version is: %3$s. Please contact your host to upgrade.', 'ecomail' ) ),
 				esc_html( $info['Name'] ),
 				esc_html( ECOMAIL_MIN_PHP_VERSION ),
 				esc_html( PHP_VERSION ),
@@ -105,7 +105,7 @@ function ecomail_php_vendor_missing() {
 			<?php
 			printf(
 			/* Translators: %s Plugin name */
-				esc_html( __( 'Opps! %s is corrupted it seems, please re-install the plugin.', 'ecomail-woocommerce' ) ),
+				esc_html( __( 'Opps! %s is corrupted it seems, please re-install the plugin.', 'ecomail' ) ),
 				esc_html( $info['Name'] )
 			);
 			?>
@@ -131,7 +131,7 @@ function ecomail_woocommerce_not_active() {
 	?>
     <div class="error notice">
         <p>
-			<?php esc_html( __( 'This plugin requires WooCommerce. Please install and activate it first.', 'ecomail-woocommerce' ) ); ?>
+			<?php esc_html( __( 'This plugin requires WooCommerce. Please install and activate it first.', 'ecomail' ) ); ?>
         </p>
     </div>
 	<?php
