@@ -210,11 +210,11 @@ class Ecomail {
 			wp_die( esc_html( __( 'The upload is running on background', 'ecomail' ) ) );
 		}
 
-		// First sync imported orders from Ecomail
-		$this->schedule_sync_imported_orders();
+		// Flag to schedule users and orders upload after sync finishes
+		update_option( 'ecomail_sync_with_orders', true );
 
-		// Then schedule users and orders upload
-		$this->add_user_ids_to_list( 1, true );
+		// Sync imported orders first, users+orders will be scheduled after sync completes
+		$this->schedule_sync_imported_orders();
 		$this->log->info( 'Scheduled sync and users and orders bulk upload' );
 		wp_safe_redirect( $this->settings->get_settings_url() );
 	}
@@ -229,12 +229,11 @@ class Ecomail {
 			wp_die( esc_html( __( 'The upload is running on background', 'ecomail' ) ) );
 		}
 
-		// First sync imported orders from Ecomail to get existing order IDs
+		// Flag to schedule order updates after sync finishes
+		update_option( 'ecomail_sync_with_update', true );
+
+		// Sync imported orders first, update will be scheduled after sync completes
 		$this->schedule_sync_imported_orders();
-
-		// Add all order IDs to update list (filtered by existing in Ecomail)
-		$this->add_order_ids_to_update_list();
-
 		$this->log->info( 'Scheduled bulk update orders' );
 		wp_safe_redirect( $this->settings->get_settings_url() );
 	}
@@ -506,6 +505,11 @@ class Ecomail {
 	 * @throws \Exception
 	 */
 	public function sync_imported_orders( $page = 1 ) {
+		// Reset imported order IDs on first page to prevent stale data from previous API key
+		if ( $page === 1 ) {
+			delete_option( self::OPTION_IMPORTED_ORDER_IDS );
+		}
+
 		$data = array(
 			'page'     => $page,
 			'per_page' => 200,
@@ -555,6 +559,20 @@ class Ecomail {
 			$this->log->info( 'Sync imported orders finished', [
 				'total_synced' => count( $imported_order_ids )
 			] );
+
+			// Schedule users and orders upload if requested
+			if ( get_option( 'ecomail_sync_with_orders' ) ) {
+				delete_option( 'ecomail_sync_with_orders' );
+				$this->add_user_ids_to_list( 1, true );
+				$this->log->info( 'Scheduled users and orders upload after sync' );
+			}
+
+			// Schedule order updates if requested
+			if ( get_option( 'ecomail_sync_with_update' ) ) {
+				delete_option( 'ecomail_sync_with_update' );
+				$this->add_order_ids_to_update_list();
+				$this->log->info( 'Scheduled order updates after sync' );
+			}
 		}
 	}
 

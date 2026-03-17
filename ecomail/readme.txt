@@ -5,7 +5,7 @@ Tags: email, marketing, newsletter, ecomail, woocommerce, emailing
 Requires at least: 6.5
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 2.4.2
+Stable tag: 2.4.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,6 +42,15 @@ If you have any questions, contact us at support@ecomail.cz or via chat directly
 == Screenshots ==
 
 == Changelog ==
+
+= 2.4.3 =
+* Fix bulk sync order: ensure imported orders sync completes before importing users and orders
+* Fix stale imported order IDs persisting after API key change
+* Fix resubscribe parameter ignoring newsletter opt-out preference
+* Fix newsletter checkbox not working in block checkout
+* Fix wp_newsletter tag not being removed on opt-out
+* Fix tags serialization as JSON object instead of array
+
 = 2.4.2 =
 * Change transaction item price from unit price to total price
 * Change category parameter to categories array (supports multiple categories per product)

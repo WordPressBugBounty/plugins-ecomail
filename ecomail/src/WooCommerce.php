@@ -76,20 +76,21 @@ class WooCommerce {
 		$checkbox_enabled       = $this->settings->get_option( 'woocommerce_checkout_subscribe_checkbox', false );
 		$disabled_by_cookie     = $this->ecomail->is_disabled_by_cookie();
 		$subscribe              = false;
+		$not_subscribe_value    = $this->get_not_subscribe_value( $order_id );
 
 		if ( $checkout_subscribe ) {
 			if (
 				! $checkbox_enabled
 				||
-				! filter_input( INPUT_POST, Ecomail::INPUT_NAME )
+				! $not_subscribe_value
 			) {
 				$subscribe = true;
 				as_schedule_single_action( time(), 'ecomail_subscribe_contact', array( 'order_id' => $order_id ) );
 			} elseif (
 				$checkbox_enabled
-				&& filter_input( INPUT_POST, Ecomail::INPUT_NAME )
+				&& $not_subscribe_value
 			) {
-				$subscribe = true;
+				$subscribe = false;
 				as_schedule_single_action( time(), 'ecomail_unsubscribe_contact', array( 'order_id' => $order_id ) );
 			}
 		}
@@ -98,7 +99,7 @@ class WooCommerce {
 			'order_id'                    => $order_id,
 			'subscribe_enabled'           => $checkout_subscribe,
 			'show_checkbox'               => $checkbox_enabled,
-			'input_value'                 => filter_input( INPUT_POST, Ecomail::INPUT_NAME ),
+			'input_value'                 => $not_subscribe_value,
 			'subscribe'                   => $subscribe,
 			'order_tracking_enabled'      => $order_tracking_enabled,
 			'cart_tracking_enabled'       => $cart_tracking_enabled,
@@ -118,6 +119,25 @@ class WooCommerce {
 		if ( $cart_tracking_enabled ) {
 			as_schedule_single_action( time(), 'ecomail_clear_cart', array( 'order_id' => $order_id ) );
 		}
+	}
+
+	private function get_not_subscribe_value( int $order_id ): bool {
+		// Classic checkout - POST data
+		$post_value = filter_input( INPUT_POST, Ecomail::INPUT_NAME );
+		if ( $post_value !== null ) {
+			return boolval( $post_value );
+		}
+
+		// Block checkout - order meta (saved by WC additional fields)
+		$order = wc_get_order( $order_id );
+		if ( $order ) {
+			$meta_value = $order->get_meta( '_wc_other/ecomail/not_subscribe' );
+			if ( $meta_value !== '' ) {
+				return boolval( $meta_value );
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -214,7 +234,10 @@ class WooCommerce {
 		$subscriber = $this->ecomail_api->get_subscriber( $this->settings->get_option( 'woocommerce_checkout_list_id' ), $subscriber_data['email'] );
 		if ( $subscriber && ! is_wp_error( $subscriber ) && ! empty( $subscriber['subscriber'] ) ) {
 			$existing_tags           = ! empty( $subscriber['subscriber']['tags'] ) ? $subscriber['subscriber']['tags'] : [];
-			$subscriber_data['tags'] = array_unique( array_merge( $existing_tags, $tags ) );
+			$subscriber_data['tags'] = array_values( array_unique( array_merge( $existing_tags, $tags ) ) );
+			if ( ! $subscribe ) {
+				$subscriber_data['tags'] = array_values( array_diff( $subscriber_data['tags'], array( 'wp_newsletter' ) ) );
+			}
 		}
 
 		if ( ! $subscribe ) {
@@ -226,7 +249,7 @@ class WooCommerce {
 			'update_existing'        => boolval( $this->settings->get_option( 'woocommerce_checkout_update', false ) ),
 			'skip_confirmation'      => boolval( $this->settings->get_option( 'woocommerce_checkout_skip_confirmation', false ) ),
 			'trigger_autoresponders' => boolval( $this->settings->get_option( 'woocommerce_checkout_trigger_autoresponders', false ) ),
-			'resubscribe'            => boolval( $this->settings->get_option( 'woocommerce_checkout_resubscribe', false ) ),
+			'resubscribe'            => $subscribe && boolval( $this->settings->get_option( 'woocommerce_checkout_resubscribe', false ) ),
 		);
 
 		$this->ecomail_api->add_subscriber( $this->settings->get_option( 'woocommerce_checkout_list_id' ), $data );
